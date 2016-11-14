@@ -45,13 +45,10 @@ before_install:
   - sudo apt-get install -y emscripten
 
 install:
-  #- if [ "${CXX}" = "g++" ]; then export CXX="" CC="gcc-5"; fi
-  #- if [ "${CXX}" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+  - export CXX="${COMPILER}"
 
 script:
-
-
-  - if [ "${COMPILER}" != "" ]; then (travis_wait make -DCC=$COMPILER all); fi
+  - if [ "${CXX}" != "" ]; then (travis_wait make all); fi
   # todo: build tests and run it
   # todo: build with emcc
 
