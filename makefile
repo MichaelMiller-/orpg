@@ -10,7 +10,7 @@ LINCS =
 LIBS = 
 LFLAGS = $(LINCS) $(CPROF)
 
-RM = rm
+RM = rm -f
 
 .cpp.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
