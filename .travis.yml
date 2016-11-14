@@ -1,4 +1,10 @@
 language: cpp
+
 compiler:
    - clang
    - gcc
+
+notifications:
+   email:
+      - miller.michael@gmx.de
+   on_start: false
