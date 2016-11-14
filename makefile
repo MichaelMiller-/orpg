@@ -4,7 +4,6 @@ OBJ = main.o
 # ./emcc tests/hello_world_sdl.cpp -o hello.html
 # ./emcc tests/hello_world_file.cpp -o hello.html --preload-file tests/hello_world_file.txt
 
-CXX = g++
 CINCS = 
 CPROF = 
 CFLAGS = $(CINCS) $(CPROF) -std=c++14 -O3
