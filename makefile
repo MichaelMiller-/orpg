@@ -1,7 +1,10 @@
 BIN = orpg
 OBJ = main.o
 
-CC = g++
+# ./emcc tests/hello_world_sdl.cpp -o hello.html
+# ./emcc tests/hello_world_file.cpp -o hello.html --preload-file tests/hello_world_file.txt
+
+CXX = g++
 CINCS = 
 CPROF = 
 CFLAGS = $(CINCS) $(CPROF) -std=c++14 -O3
@@ -13,10 +16,10 @@ LFLAGS = $(LINCS) $(CPROF)
 RM = rm -f
 
 .cpp.o:
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGS) -c -o $@ $<
 
 $(BIN): $(OBJ)
-	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) $(LFLAGS) -o $@ $^ $(LIBS)
 
 clean:
 	$(RM) $(BIN) *.o

@@ -1,8 +1,21 @@
+sudo: false
+
 language: cpp
 
-compiler:
-  - clang
-  - gcc
+matrix:
+  include:
+  - os: linux
+    env: CXX=g++-6
+    addons:
+      apt:
+        packages: ["g++-6", "libstdc++-6-dev", "gdb"]
+        sources: ["ubuntu-toolchain-r-test"]
+  - os: linux
+    env: CXX=clang++-3.9
+    addons:
+      apt:
+        packages: ["clang-3.9", "libstdc++-5-dev", "gdb"]
+        sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-precise"]
 
 script:
   make all
