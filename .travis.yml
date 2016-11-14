@@ -1,10 +1,18 @@
 language: cpp
 
 compiler:
-   - clang
-   - gcc
+  - clang
+  - gcc
+
+script:
+  make all
+  # todo: build tests and run it
+  # todo: build with emcc
+
+after_success:
+  # todo: push emcc result to webhost
 
 notifications:
-   email:
-      - miller.michael@gmx.de
-   on_start: false
+  email:
+    - miller.michael@gmx.de
+  on_start: false
