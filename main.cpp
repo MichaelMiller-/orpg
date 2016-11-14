@@ -3,5 +3,5 @@
 int main(int argc, char** argv)
 {
    std::cout << "hello world: " << 
-   retrun 0;
+   return 0;
 }
