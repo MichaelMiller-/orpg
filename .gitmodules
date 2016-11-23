@@ -1,0 +1,9 @@
+[submodule "deps/catch"]
+	path = deps/catch
+	url = https://github.com/philsquared/Catch
+[submodule "deps/di"]
+	path = deps/di
+	url = https://github.com/boost-experimental/di.git
+[submodule "deps/sml"]
+	path = deps/sml
+	url = https://github.com/boost-experimental/sml.git
