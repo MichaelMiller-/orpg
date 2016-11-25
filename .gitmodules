@@ -1,6 +1,7 @@
 [submodule "sml"]
 	path = deps/sml
 	url = https://github.com/boost-experimental/sml.git
+
 [submodule "catch"]
 	path = deps/catch
 	url = https://github.com/philsquared/Catch.git
