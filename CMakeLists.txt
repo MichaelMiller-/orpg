@@ -10,26 +10,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 include(ExternalProject)
-ExternalProject_Add(
-        sec21-external
-        GIT_REPOSITORY https://github.com/MichaelMiller-/sec21
-        GIT_PROGRESS TRUE
-        #        STEP_TARGETS configure
-        # DEPENDS orpg
-        CMAKE_ARGS -Wno-dev
-        -D BUILD_TESTING=OFF
-        -D CMAKE_BUILD_TYPE=Release
-        -D CMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
-        -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-)
+#ExternalProject_Add(
+#        sec21-external
+#        GIT_REPOSITORY https://github.com/MichaelMiller-/sec21
+#        GIT_PROGRESS TRUE
+#        #        STEP_TARGETS configure
+#        # DEPENDS orpg
+#        CMAKE_ARGS -Wno-dev
+#        -D BUILD_TESTING=OFF
+#        -D CMAKE_BUILD_TYPE=Release
+#        -D CMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
+#        -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+#)
 
-ExternalProject_Get_property(sec21-external INSTALL_DIR)
-message("Source dir of myExtProj = ${INSTALL_DIR}")
-
-cmake_print_variables(INSTALL_DIR)
-
-ExternalProject_Get_property(sec21-external SOURCE_DIR)
-message("Source dir of myExtProj = ${SOURCE_DIR}")
+# ExternalProject_Get_property(sec21-external INSTALL_DIR)
+# ExternalProject_Get_property(sec21-external SOURCE_DIR)
+# cmake_print_variables(INSTALL_DIR)
 
 # ExternalProject_Add_Step(sec21-external configure
 #         COMMAND ${CMAKE_COMMAND} -Wno-dev -D BUILD_TESTING=OFF
@@ -53,7 +49,7 @@ configure_file(${PROJECT_SOURCE_DIR}/src/config.h.in ${PROJECT_BINARY_DIR}/confi
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 
-add_dependencies(${PROJECT_NAME} sec21-external)
+# add_dependencies(${PROJECT_NAME} sec21-external)
 # ExternalProject_Add_StepDependencies(${PROJECT_NAME} configure sec21-external)
 # ExternalProject_Add_StepDependencies(secretsauce build foobar)
 
@@ -64,7 +60,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${PROJECT_BINARY_DIR}/include)
 
 if (EMSCRIPTEN)
-  ## TODO: as of April 2022 vcpkg has no working raylib:wasm32-emspripten package, therefor use this workaround
+  ## TODO: as of April 2022 vcpkg has no working raylib:wasm32-emspripten package, therefore use this workaround
   ExternalProject_Add(
           raylib-external
           GIT_REPOSITORY https://github.com/raysan5/raylib
@@ -92,10 +88,8 @@ if (EMSCRIPTEN)
   add_dependencies(${PROJECT_NAME} raylib-external)
 
   target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/lib)
-  target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 else()
   find_package(raylib CONFIG REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 endif ()
 
 find_package(spdlog CONFIG REQUIRED)
@@ -104,6 +98,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 # target_link_libraries(${PROJECT_NAME} PRIVATE sec21::sec21)
 
 include(CTest)
