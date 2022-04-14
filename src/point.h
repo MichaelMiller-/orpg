@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <compare>
 // #ifndef NDEBUG
 #include <ostream>
 #include <sstream>
@@ -15,7 +14,16 @@ namespace orpg
         value_t x{0};
         value_t y{0};
 
-        [[nodiscard]] constexpr auto operator<=>(point const &other) const = default;
+        // [[nodiscard]] constexpr auto operator<=>(point const &other) const = default;
+
+        [[nodiscard]] constexpr auto operator == (point const &other) const
+        {
+            return x == other.x && y == other.y;
+        }
+        [[nodiscard]] constexpr auto operator != (point const &other) const
+        {
+            return !(*this == other);
+        }
 
 // #ifndef NDEBUG
         template <typename CharT, typename Traits>
