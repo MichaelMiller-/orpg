@@ -15,10 +15,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - uses: mymindstorm/setup-emsdk@v11
-
-    - name: Verify
-      run: emcc -v
+    - name: Install emsdk
+      shell: bash
+      working-directory: ${{runner.workspace}}
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        git pull
+        ./emsdk install latest
+        ./emsdk activate latest
+        source ./emsdk_env.sh
 
     - name: Install Dependencies
       shell: bash
@@ -42,4 +48,3 @@ jobs:
       run: |
         echo "${{secrets.DEPLOY_KEY}}" > ~/deploy_key
         chmod 400 ~/deploy_key
-        sshpass -p 'cat ~/deploy_key' rsync -ave ssh ./build/ root@efeeab4.online-server.cloud:/var/www/frontend
