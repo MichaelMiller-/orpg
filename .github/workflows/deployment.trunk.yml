@@ -1,22 +1,42 @@
 name: Web Deployment
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 16.x
-    - run: npm install
-    - run: npm run build
+
+    - uses: mymindstorm/setup-emsdk@v11
+
+    - name: Verify
+      run: emcc -v
+
+    - name: Install Dependencies
+      shell: bash
+      working-directory: ${{runner.workspace}}
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git 
+        cd vcpkg
+        ./bootstrap-vcpkg.sh
+        ./vcpkg install spdlog:wasm32-emscripten
+        ./vcpkg install nlohmann-json:wasm32-emscripten
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{runner.workspace}}/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DPLATFORM=Web -DVCPKG_TARGET_TRIPLET=wasm32-emscripten -DBUILD_TESTING=OFF
 
     - name: Sync
       run: |
