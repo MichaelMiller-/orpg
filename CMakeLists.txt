@@ -1,64 +1,113 @@
-cmake_minimum_required(VERSION 2.8)
-project(orpg CXX)
+cmake_minimum_required(VERSION 3.1)
+project(orpg
+        VERSION 0.0.1
+        DESCRIPTION "Multiplayer RPG"
+        )
 
-# if(CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])*")
-#  set(CMAKE_CXX_COMPILER_ID "Emscripten")
-# endif()
+include(CMakePrintHelpers)
 
-## specifying where to look for .cmake files
-##
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/deps/sdl2-cmake-scripts")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# add_custom_target(app DEPENDS ${PROJECT_NAME} copy-data-files)
-# add_custom_target(style)
-# add_custom_target(copy-data-files ALL COMMAND cmake -E copy_directory ${CMAKE_SOURCE_DIR}/data ${CMAKE_BINARY_DIR}/data)
-# add_custom_command(TARGET style COMMAND find ${CMAKE_CURRENT_LIST_DIR}/include ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/test -iname "*.hpp" -or -iname "*.cpp" | xargs clang-format -i)
 
-##
-## TODO different setting for windows and linux
-## 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-## set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-## set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
-## set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
-## set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c99-extensions")
+include(ExternalProject)
+ExternalProject_Add(
+        sec21-external
+        GIT_REPOSITORY https://github.com/MichaelMiller-/sec21
+        GIT_PROGRESS TRUE
+        #        STEP_TARGETS configure
+        # DEPENDS orpg
+        CMAKE_ARGS -Wno-dev
+        -D BUILD_TESTING=OFF
+        -D CMAKE_BUILD_TYPE=Release
+        -D CMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
+        -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+)
 
-# if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Emscripten")
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --emrun")
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2")
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s BINARYEN=1")
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --preload-file data --use-preload-plugins")
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --shell-file ${CMAKE_SOURCE_DIR}/data/template.html")
+ExternalProject_Get_property(sec21-external INSTALL_DIR)
+message("Source dir of myExtProj = ${INSTALL_DIR}")
 
-  #set(WEB "index.html")
-  #add_custom_target(web DEPENDS ${WEB} copy-data-files)
-  #add_custom_target(emrun)
-  #add_custom_command(TARGET emrun COMMAND emrun --port 8080 index.html)
-  #add_executable(${WEB} src/main.cpp)
+cmake_print_variables(INSTALL_DIR)
 
-##else()
-#   include(FindPkgConfig)
-#   pkg_search_module(SDL2 REQUIRED sdl2)
-#   pkg_search_module(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
-#   pkg_search_module(SDL2TTF REQUIRED SDL2_ttf>=2.0.0)
+ExternalProject_Get_property(sec21-external SOURCE_DIR)
+message("Source dir of myExtProj = ${SOURCE_DIR}")
 
-###
-###  TODO use package manager
-#
-  set(SDL2_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/deps/SDL2-2.0.5/include)
-  link_directories(${PROJECT_SOURCE_DIR}/deps/SDL2-2.0.5/lib/x86)
-  set(SDL2_LIBRARY SDL2.lib SDL2main.lib)
+# ExternalProject_Add_Step(sec21-external configure
+#         COMMAND ${CMAKE_COMMAND} -Wno-dev -D BUILD_TESTING=OFF
+#         COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR>
+# )
+# ExternalProject_Add_StepTargets(sec21-external configure)
 
-## endif()
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR}/sec21-install-dir/lib/cmake/sec21)
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/sec21)
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/raylib)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/raylib)
+# list(APPEND CMAKE_PREFIX_PATH /home/michael/dev/sec21/cmake-build-debug/fooinstall/lib/cmake/sec21)
+# list(APPEND CMAKE_MODULE_PATH /home/michael/dev/sec21/cmake-build-debug/fooinstall/lib/cmake/sec21)
+# list(APPEND CMAKE_PREFIX_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-include_directories(inc)
-include_directories(deps/di/include)
-include_directories(deps/sml/include)
-include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR})
+cmake_print_variables(CMAKE_MODULE_PATH)
+cmake_print_variables(CMAKE_PREFIX_PATH)
+
+configure_file(${PROJECT_SOURCE_DIR}/src/config.h.in ${PROJECT_BINARY_DIR}/config.h)
 
 add_executable(${PROJECT_NAME} src/main.cpp)
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})
 
-enable_testing()
-add_subdirectory(test)
+add_dependencies(${PROJECT_NAME} sec21-external)
+# ExternalProject_Add_StepDependencies(${PROJECT_NAME} configure sec21-external)
+# ExternalProject_Add_StepDependencies(secretsauce build foobar)
+
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+target_include_directories(${PROJECT_NAME}
+        PRIVATE src/inc
+        PRIVATE ${PROJECT_BINARY_DIR}
+        PRIVATE ${PROJECT_BINARY_DIR}/include)
+
+if (EMSCRIPTEN)
+  ## TODO: as of April 2022 vcpkg has no working raylib:wasm32-emspripten package, therefor use this workaround
+  ExternalProject_Add(
+          raylib-external
+          GIT_REPOSITORY https://github.com/raysan5/raylib
+          GIT_PROGRESS TRUE
+          CMAKE_ARGS -Wno-dev
+          -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+          -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+          -D PLATFORM=Web
+          -D EMSCRIPTEN=ON
+          -D EMSCRIPTEN_FORCE_COMPILERS=ON
+          -D BUILD_EXAMPLES=OFF
+          -D OPENGL_VERSION=OFF
+          -D USE_EXTERNAL_GLFW=OFF
+          -D CMAKE_BUILD_TYPE=Release
+          -D CMAKE_TOOLCHAIN_FILE:PATH=${VCPKG_CHAINLOAD_TOOLCHAIN_FILE}
+          -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+  )
+
+  configure_file(${PROJECT_SOURCE_DIR}/data/template.html ${PROJECT_BINARY_DIR}/template.html COPYONLY)
+
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY --shell-file template.html")
+  # This line is used to set your executable to build with the emscripten html template so taht you can directly open it.
+  set(CMAKE_EXECUTABLE_SUFFIX ".html")
+
+  add_dependencies(${PROJECT_NAME} raylib-external)
+
+  target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/lib)
+  target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+else()
+  find_package(raylib CONFIG REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+endif ()
+
+find_package(spdlog CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+# find_package(sec21 CONFIG REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
+# target_link_libraries(${PROJECT_NAME} PRIVATE sec21::sec21)
+
+include(CTest)
+if (BUILD_TESTING) # option is created by CTest
+  enable_testing()
+  add_subdirectory(tests)
+endif ()
