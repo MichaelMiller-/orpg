@@ -22,6 +22,7 @@ jobs:
       - name: Install Compiler
         run: |
           sudo apt install clang
+          sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
           clang --version
           sudo pip install gcovr
           
