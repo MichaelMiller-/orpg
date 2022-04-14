@@ -25,6 +25,7 @@ jobs:
     - name: Install Compiler
       run: |
         sudo apt install gcc-10
+        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
         g++ --version
 
     - name: Install Dependencies
