@@ -1,0 +1,7 @@
+#pragma once
+
+#define VERSION_MAJOR @orpg_VERSION_MAJOR@
+#define VERSION_MINOR @orpg_VERSION_MINOR@
+
+constexpr char EXECUTABLE_NAME[] = "@PROJECT_NAME@";
+constexpr char BINARY_DIRECTORY[] = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@";
