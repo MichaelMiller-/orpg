@@ -33,12 +33,32 @@ TEST_CASE("geometric rectangle class", "[geometry]")
         REQUIRE(rc1.intersects({ { 0, 0 }, { 5, 5 } }) == false);
         REQUIRE(rc1.intersects({ { 0, 0 }, { 15, 15 } }) == true);
     }
-    SECTION("is rect inside")
+    SECTION("calculate center point")
+    {
+        REQUIRE(rc1.center() == point{30, 35});
+    }
+    SECTION("check if a point is inside the rect")
+    {
+        REQUIRE(rc1.is_inside(point{ 0, 0 }) == false);
+        REQUIRE(rc1.is_inside(point{ 0, 5 }) == false);
+        REQUIRE(rc1.is_inside(point{ 10, 5 }) == true);
+        REQUIRE(rc1.is_inside(point{ 20, 30 }) == true);
+        REQUIRE(rc1.is_inside(point{ 50, 35 }) == true);
+        REQUIRE(rc1.is_inside(point{ 50, 65 }) == true);
+        REQUIRE(rc1.is_inside(point{ 100, 5 }) == false);
+        REQUIRE(rc1.is_inside(point{ 100, 100 }) == false);
+    }
+    SECTION("check if another rect is full inside")
     {
         REQUIRE(rc1.is_inside({ { 0, 0 }, { 5, 5 } }) == false);
         REQUIRE(rc1.is_inside({ { 0, 0 }, { 15, 15 } }) == false);
         REQUIRE(rc1.is_inside({ { 10, 10 }, { 15, 15 } }) == true);
         REQUIRE(rc1.is_inside({ { 10, 10 }, { 40, 15 } }) == true);
         REQUIRE(rc1.is_inside({ { 40, 60 }, { 100, 100 } }) == false);
+    }
+    SECTION("divide")
+    {
+        const auto result = rc1 / 2;
+        REQUIRE(result == rect{ {10, 5}, { 20, 30}});
     }
 }
