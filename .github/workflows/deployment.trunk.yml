@@ -56,11 +56,10 @@ jobs:
     - name: Sync
       env:
         dest: 'web187@server34.configcenter.info:orpg.pb-miller.de'
+      working-directory: ${{runner.workspace}}/build/bin
       run: |
         echo "${{secrets.DEPLOY_KEY}}" > deploy_key
         chmod 600 ./deploy_key
-        rsync -chav --delete \
-          -e 'ssh -i ./deploy_key -o StrictHostKeyChecking=no' \
-          ${{runner.workspace}}/build/bin ${{env.dest}}
+        rsync -chav --delete -e 'ssh -i ./deploy_key -o StrictHostKeyChecking=no' . ${{env.dest}}
 
 
