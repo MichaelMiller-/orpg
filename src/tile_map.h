@@ -22,6 +22,6 @@ namespace orpg
     template <typename Tag, auto Y, auto X, auto const& Tiles, auto const& Entities>
     [[nodiscard]] constexpr auto extent(tile_map<Tag, Y, X, Tiles, Entities>) noexcept
     {
-        return extents{Y, X};
+        return extents{X, Y};
     }
 }
