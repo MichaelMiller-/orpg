@@ -58,5 +58,10 @@ jobs:
         ls -al *
         echo "${{secrets.DEPLOY_KEY}}" > ~/deploy_key
         chmod 400 ~/deploy_key
-        sshpass -p 'cat ~/deploy_key' sftp -v web187_orpg@server34.configcenter.info
+        echo "put bin/orpg.html" > ~/upload_commands
+        echo "put bin/orpg.js" > ~/upload_commands
+        echo "put bin/orpg.wasm" > ~/upload_commands
+        echo "quit" > ~/upload_commands
+        sshpass -p 'cat ~/deploy_key' sftp -v web187_orpg@server34.configcenter.info -b ~/upload_commands
+
 
