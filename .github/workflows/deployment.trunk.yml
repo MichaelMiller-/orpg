@@ -47,7 +47,14 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{runner.workspace}}/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DPLATFORM=Web -DVCPKG_TARGET_TRIPLET=wasm32-emscripten -DBUILD_TESTING=OFF
 
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --config ${{matrix.config}}
+
     - name: Sync
+      working-directory: ${{runner.workspace}}/build
       run: |
+        ls -al *
         echo "${{secrets.DEPLOY_KEY}}" > ~/deploy_key
         chmod 400 ~/deploy_key
