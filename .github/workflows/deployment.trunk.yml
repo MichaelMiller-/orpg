@@ -55,7 +55,6 @@ jobs:
     - name: Sync
       working-directory: ${{runner.workspace}}/build
       run: |
-        ls -al *
         echo "${{secrets.DEPLOY_KEY}}" > ~/deploy_key
         chmod 400 ~/deploy_key
         echo "put bin/orpg.html" > ~/upload_commands
