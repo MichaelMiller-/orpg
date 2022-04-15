@@ -28,6 +28,7 @@ jobs:
         emcc -v
         A = $EMSDK
         A += "/upstream/bin"
+        echo $A
         export $PATH
 
     - name: Install Dependencies
