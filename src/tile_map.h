@@ -11,9 +11,9 @@ namespace orpg
 
         using tag_t = Tag;
 
-        static inline constexpr auto rows_v = Y;
-        static inline constexpr auto cols_v = X;
-        static inline constexpr auto tile_size_v = 32;
+        static inline constexpr std::uint16_t rows_v = Y;
+        static inline constexpr std::uint16_t cols_v = X;
+        static inline constexpr std::uint16_t tile_size_v = 32;
 
         static constexpr decltype(Tiles) tiles = Tiles;
         static constexpr decltype(Entities) entities = Entities;
