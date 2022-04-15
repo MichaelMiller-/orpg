@@ -25,8 +25,9 @@ jobs:
         ./emsdk install latest
         ./emsdk activate latest
         source ./emsdk_env.sh
+        emcc -v
         export PATH
-
++
     - name: Install Dependencies
       shell: bash
       working-directory: ${{runner.workspace}}
