@@ -14,12 +14,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install locate
-      shell: bash
-      run: |
-        sudo apt-get install mlocate
-        sudo updatedb
-        
+
     - name: Install emsdk
       shell: bash
       working-directory: ${{runner.workspace}}
@@ -31,10 +26,8 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
         emcc -v
-        locate emcc
-        ls /home/runner/work/orpg/emsdk/upstream/bin -al
-        echo ${{ env.PATH }}
-        echo "/home/runner/work/orpg/emsdk/upstream/bin" >> $GITHUB_PATH
+        echo "$EMSDK/upstream/emscripten" >> $GITHUB_PATH
+        echo "$EMSDK/upstream/bin" >> $GITHUB_PATH
 
     - name: Install Dependencies
       shell: bash
@@ -54,7 +47,19 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{runner.workspace}}/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DPLATFORM=Web -DVCPKG_TARGET_TRIPLET=wasm32-emscripten -DBUILD_TESTING=OFF
 
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --config Release
+
     - name: Sync
+      env:
+        dest: 'web187@server34.configcenter.info:orpg.pb-miller.de'
       run: |
-        echo "${{secrets.DEPLOY_KEY}}" > ~/deploy_key
-        chmod 400 ~/deploy_key
+        echo "${{secrets.DEPLOY_KEY}}" > deploy_key
+        chmod 600 ./deploy_key
+        rsync -chav --delete \
+          -e 'ssh -i ./deploy_key -o StrictHostKeyChecking=no' \
+          ${{runner.workspace}}/build/bin ${{env.dest}}
+
+
