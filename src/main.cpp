@@ -170,7 +170,8 @@ namespace orpg {
                     return map_bounding_rect;
                 }
                 return rect{map_bounding_rect.top_left_position,
-                            {map_bounding_rect.extent.width - 1, map_bounding_rect.extent.height - 1}};
+                            {static_cast<decltype(extents::width)>(map_bounding_rect.extent.width - 1),
+                             static_cast<decltype(extents::height)>(map_bounding_rect.extent.height - 1)}};
             };
 
             if (map_border().is_inside(delta)) {
@@ -305,7 +306,7 @@ namespace orpg {
             if (!gameOver) {
 
                 std::visit([this](auto map) { draw_map(map); }, maps);
-                // std::visit([this](auto map) { draw_map_entites(map); }, maps);
+                // std::visit([this](auto map) { draw_map_entities(map); }, maps);
 
                 // Draw to player
                 DrawRectangleV(world_to_screen(player.position - camera) + (screen_offset / 2), player.size,
@@ -325,7 +326,7 @@ namespace orpg {
             }
 
             draw_game_debug_information();
-            // draw_gamepad_debug_information();
+            draw_gamepad_debug_information();
 
             EndDrawing();
         }
@@ -419,7 +420,7 @@ namespace orpg {
         }
 
         template<typename Map>
-        void draw_map_entites(Map map) const noexcept {
+        void draw_map_entities(Map map) const noexcept {
             const auto func2 = [&map](auto row, auto col) {
                 return std::visit(overloaded{
                                           [](portal) {
