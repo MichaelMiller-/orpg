@@ -31,7 +31,6 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
         emcc -v
-        locate emcc
         ls /home/runner/work/orpg/emsdk/upstream/bin -al
         echo ${{ env.PATH }}
         echo "/home/runner/work/orpg/emsdk/upstream/bin" >> $GITHUB_PATH
