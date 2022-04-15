@@ -53,14 +53,13 @@ jobs:
       run: cmake --build . --config Release
 
     - name: Sync
-      working-directory: ${{runner.workspace}}/build
+      env:
+        dest: 'web187@server34.configcenter.info:orpg.pb-miller.de'
       run: |
-        echo "${{secrets.DEPLOY_KEY}}" > ~/deploy_key
-        chmod 400 ~/deploy_key
-        echo "put bin/orpg.html" > ~/upload_commands
-        echo "put bin/orpg.js" > ~/upload_commands
-        echo "put bin/orpg.wasm" > ~/upload_commands
-        echo "quit" > ~/upload_commands
-        sshpass -p 'cat ~/deploy_key' sftp -v web187_orpg@server34.configcenter.info -b ~/upload_commands
+        echo "${{secrets.DEPLOY_KEY}}" > deploy_key
+        chmod 600 ./deploy_key
+        rsync -chav --delete \
+          -e 'ssh -i ./deploy_key -o StrictHostKeyChecking=no' \
+          ${{runner.workspace}}/build/bin ${{env.dest}}
 
 
