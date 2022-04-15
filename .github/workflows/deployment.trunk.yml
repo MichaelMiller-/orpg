@@ -50,7 +50,7 @@ jobs:
     - name: Build
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: cmake --build . --config ${{matrix.config}}
+      run: cmake --build . --config Release
 
     - name: Sync
       working-directory: ${{runner.workspace}}/build
