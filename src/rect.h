@@ -60,10 +60,9 @@ namespace orpg {
             return extent.center() + top_left_position;
         }
 
-        //! \todo write tests
         [[nodiscard]] constexpr auto is_inside(point pt) const noexcept -> bool {
             return pt.x >= top_left_position.x && pt.y >= top_left_position.y &&
-                   pt.x < (top_left_position.x + extent.width) && pt.y < (top_left_position.y + extent.height);
+                   pt.x <= (top_left_position.x + extent.width) && pt.y <= (top_left_position.y + extent.height);
         }
 
         [[nodiscard]] constexpr auto is_inside(rect const &other) const noexcept -> bool {
@@ -83,7 +82,12 @@ namespace orpg {
         }
 // #endif
     };
-// #ifndef NDEBUG
+
+    [[nodiscard]] constexpr bool operator==(rect const &lhs, rect const &rhs) noexcept {
+        return std::tie(lhs.top_left_position, lhs.extent) == std::tie(rhs.top_left_position, rhs.extent);
+    }
+
+    // #ifndef NDEBUG
     [[nodiscard]] inline auto to_string(rect const &obj) {
         std::stringstream result{};
         result << obj;
