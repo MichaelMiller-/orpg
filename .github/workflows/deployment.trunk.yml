@@ -33,6 +33,7 @@ jobs:
         emcc -v
         ls /home/runner/work/orpg/emsdk/upstream/bin -al
         echo ${{ env.PATH }}
+        echo $EMSDK
         echo "/home/runner/work/orpg/emsdk/upstream/bin" >> $GITHUB_PATH
 
     - name: Install Dependencies
