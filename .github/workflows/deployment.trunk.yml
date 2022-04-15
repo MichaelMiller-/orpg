@@ -14,11 +14,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
     - name: Install locate
       shell: bash
       run: |
         sudo apt-get install mlocate
-        sudo updatedb
+        locate emcc
         
     - name: Install emsdk
       shell: bash
