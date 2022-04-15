@@ -1,5 +1,5 @@
 
-[![GCC 10.2](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc10.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc10.yml) [![GCC 11.0](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc11.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc11.yml)  
+[![GCC 10.3](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc10.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc10.yml) [![GCC 11.0](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc11.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc11.yml)  
 [![Clang 10.0](https://github.com/MichaelMiller-/orpg/actions/workflows/clang10.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/clang10.yml)  
 [![MSVC 2019](https://github.com/MichaelMiller-/orpg/actions/workflows/msvc2019.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/msvc2019.yml)  
 
