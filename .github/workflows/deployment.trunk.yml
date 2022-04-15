@@ -17,8 +17,8 @@ jobs:
     - name: Install locate
       shell: bash
       run: |
-        apt-get install mlocate
-        updatedb
+        sudo apt-get install mlocate
+        sudo updatedb
         
     - name: Install emsdk
       shell: bash
