@@ -58,3 +58,5 @@ jobs:
         ls -al *
         echo "${{secrets.DEPLOY_KEY}}" > ~/deploy_key
         chmod 400 ~/deploy_key
+        sshpass -p 'cat ~/deploy_key' sftp -v web187_orpg@server34.configcenter.info
+
