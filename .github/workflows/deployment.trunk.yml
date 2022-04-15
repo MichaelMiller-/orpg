@@ -27,6 +27,7 @@ jobs:
         source ./emsdk_env.sh
         emcc -v
         ls /home/runner/work/orpg/emsdk/upstream/bin
+        echo ${{ env.PATH }}
 
     - name: Install Dependencies
       shell: bash
