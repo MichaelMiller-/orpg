@@ -14,13 +14,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
-    - name: Install locate
-      shell: bash
-      run: |
-        sudo apt-get install mlocate
-        locate emcc
-        
+
     - name: Install emsdk
       shell: bash
       working-directory: ${{runner.workspace}}
@@ -32,10 +26,8 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
         emcc -v
-        ls /home/runner/work/orpg/emsdk/upstream/bin -al
-        echo ${{ env.PATH }}
-        echo $EMSDK
-        echo "/home/runner/work/orpg/emsdk/upstream/bin" >> $GITHUB_PATH
+        echo "$EMSDK/upstream/emscripten" >> $GITHUB_PATH
+        echo "$EMSDK/upstream/bin" >> $GITHUB_PATH
 
     - name: Install Dependencies
       shell: bash
