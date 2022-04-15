@@ -26,9 +26,7 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
         emcc -v
-        A = $EMSDK
-        A += "/upstream/bin"
-        echo $A
+        ls $EMSDK
         export $PATH
 
     - name: Install Dependencies
