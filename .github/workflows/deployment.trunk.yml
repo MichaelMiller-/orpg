@@ -26,7 +26,9 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
         emcc -v
-        export $PATH:/home/runner/work/orpg/emsdk/upstream/bin
+        A = $EMSDK
+        A += "/upstream/bin"
+        export $PATH
 
     - name: Install Dependencies
       shell: bash
