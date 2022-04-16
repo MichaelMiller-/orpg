@@ -30,8 +30,8 @@ namespace orpg
             {none{}, none{}, none{},    none{}, none{}, portal{house2{}, {0, 2}}},
             {none{}, none{}, none{},    none{}, none{}, none{}},
             {none{}, none{}, blocked{}, none{}, none{}, none{}},
-            {none{}, none{}, blocked{}, blocked{}, none{}, none{}},
-            {none{}, none{}, blocked{}, blocked{}, blocked{}, none{}},
+            {none{}, none{}, blocked{}, none{}, none{}, none{}},
+            {none{}, none{}, blocked{}, none{}, none{}, none{}},
     };
     static constexpr std::uint8_t tiles_house2[4][4] = {
             {0, 1, 2, 100},
@@ -195,21 +195,21 @@ namespace orpg
             {3, 0, 1, 0, 2, 0, 0, 0, 0, 4, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3 },
     };
     static constexpr entities_t entities_test_world[15][20] = {
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
-            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, chest{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
+            {none{}, none{}, none{}, none{}, none{}, blocked{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}, none{}},
     };
     // clang-format on
 
