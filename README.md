@@ -9,6 +9,17 @@
 
 **orpg** is a role-playing game.
 
+## Features
+- draw tiles and entities
+- collision detection with entities
+- collision detection with the edge of the map
+
+## Enitity types
+| Entity | Color |
+|---|---|
+| blocked | black |
+
+### Screenshot
 ![current-dev-version](data/2022-04-14_screenshot.png)
 
 Try the current dev-version [online](http://orpg.pb-miller.de/orpg.html)
