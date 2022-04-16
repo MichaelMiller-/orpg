@@ -13,12 +13,14 @@
 - draw tiles and entities
 - collision detection with entities
 - collision detection with the edge of the map
+- portal system. allows switching between different maps
 
 ## Entity types
 | Entity  | Color |
 |---------|-------|
 | blocked | black |
 | chest   | gold  |
+| portal  | pink  |
 
 ### Screenshot
 ![current-dev-version](data/2022-04-14_screenshot.png)

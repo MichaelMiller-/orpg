@@ -57,6 +57,24 @@ namespace orpg {
     };
     using gamestate_t = std::variant<loading, main_menu, play, game_over>;
 
+    class rpg_camera {
+        point pt{0, 0};
+        const rect view{};;
+    public:
+        explicit rpg_camera(rect viewport) : view{std::move(viewport)} {
+            spdlog::debug("rpg camera view: {}", to_string(view));
+        }
+
+        void move(point const &pt) {
+
+            const auto h2 = view.height() / 2;
+            const auto w2 = view.width() / 2;
+            const auto mx = std::max(pt.x - w2, 0);
+            const auto my = std::max(pt.y - h2, 0);
+
+        }
+    };
+
     class application {
         // window
         settings cfg{};
@@ -70,10 +88,12 @@ namespace orpg {
         Food player{};
         point map_offset{0, 0};
 
-        std::variant<village1_house1_t, village1_house2_t, village1_house3_t, world1_t, test_world_t> maps = village1_house1_t{};
+        rpg_camera cam;
+
+        std::variant<village1_house1_t, village1_house2_t, village1_house3_t, world1_t, test_world_t> maps = world1_t{};
 
     public:
-        application(settings defaults) : cfg{std::move(defaults)}, view{defaults.window / SQUARE_SIZE} {
+        application(settings defaults) : cfg{std::move(defaults)}, view{defaults.window / SQUARE_SIZE}, cam{view} {
             spdlog::debug("initial view: ({},{}) [{}x{}]", view.top_left_position.x, view.top_left_position.y,
                           view.extent.width, view.extent.height);
 
@@ -120,18 +140,14 @@ namespace orpg {
             screen_offset.y = cfg.window.height() % SQUARE_SIZE;
             spdlog::debug("window offset: ({},{})", screen_offset.x, screen_offset.y);
 
-            const auto ext = rect{ {0,0}, std::visit([](auto map) { return extent(map); }, maps) };
-            // spdlog::debug("extents initial map: {}x{}", ext.width, ext.height);
+            const auto ext = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
+            spdlog::debug("extents initial map: {}", to_string(ext));
 
             map_offset = {0, 0}; // view.center() - std::visit([](auto map) { return center(map); }, maps);
 
-            if (view.is_inside(ext))
-            {
-               map_offset = ext.centered(view.extent).top_left_position;
+            if (view.is_inside(ext)) {
+                map_offset = ext.centered(view.extent).top_left_position;
             }
-
-            spdlog::debug("map offset: ({},{})", map_offset.x, map_offset.y);
-
             player.position = point{2, 2}; // view.center(); // world position
         }
 
@@ -145,7 +161,18 @@ namespace orpg {
 
         [[nodiscard]] auto half_window_height() const noexcept { return cfg.window.height() / 2; }
 
-        auto screen_to_map_pos(point p) -> point { return p - map_offset; }
+        auto move_camera(int dx, int dy) {
+
+            const auto map_bounding_rect = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
+
+            const auto h2 = view.height() / 2;
+            const auto w2 = view.width() / 2; // 10
+            const auto mx = std::max(dx - w2, 0);
+            const auto my = std::max(dy - h2, 0);
+
+            camera.x = std::min(mx, map_bounding_rect.width() - view.width());
+            camera.y = std::min(my, map_bounding_rect.height() - view.height());
+        }
 
         auto move_player(int dx, int dy) {
             const auto delta = player.position + decltype(player.position){dx, dy};
@@ -164,44 +191,20 @@ namespace orpg {
             }
 
             const auto map_bounding_rect = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
-            // spdlog::debug("map_bounding_rect: {} ", to_string(map_bounding_rect));
-
             if (map_bounding_rect.is_inside(delta) == false) {
                 spdlog::debug("player movement to ({},{}) ----- map extent", delta.x, delta.y);
                 return;
             }
-#if 0
-            const auto map_border = [this, map_bounding_rect]() {
-                if (view.is_inside(map_bounding_rect)) {
-                    return map_bounding_rect;
-                }
-                return rect{map_bounding_rect.top_left_position,
-                            {static_cast<decltype(extents::width)>(map_bounding_rect.extent.width - 1),
-                             static_cast<decltype(extents::height)>(map_bounding_rect.extent.height - 1)}};
-            };
 
-            if (map_border().is_inside(delta)) {
-                player.position = delta;
-            } else {
-                spdlog::debug("player movement to ({},{}) is blocked", delta.x, delta.y);
-            }
-#endif
             player.position = delta;
 
             if (view.is_inside(map_bounding_rect)) {
                 // map is smaller than viewport -> no camera movement
                 return;
             }
-
-            // halbes view rechteck als schwelle zur kamera bewegung
-            const auto h2 = view.height() / 2;
-            const auto w2 = view.width() / 2; // 10
-            const auto mx = std::max(delta.x - w2, 0);
-            const auto my = std::max(delta.y - h2, 0);
-
-            camera.x = std::min(mx, map_bounding_rect.width() - view.width());
-            camera.y = std::min(my, map_bounding_rect.height() - view.height());
+            move_camera(delta.x, delta.y);
         }
+
 
         void logic() {
             if (IsKeyPressed(KEY_F12)) {
@@ -231,61 +234,57 @@ namespace orpg {
                         move_player(0, 1);
                     }
 
-                    const auto is_under_portal = [this](point pos) {
-                        return std::visit(
-                                [p = pos](auto map) { return std::get_if<portal>(&map.entities[p.y][p.x]) != nullptr; },
-                                maps);
-                    };
+                    const auto trigger = [this](point pos) {
+                        spdlog::debug("trigger: {}", to_string(pos));
 
-                    const auto trigger_portal = [this](point pos) {
-                        return std::visit(
+                        std::visit(
                                 [this, p = pos](auto map) {
-                                    if (const auto value = std::get_if<portal>(&map.entities[p.y][p.x]); value) {
+                                    spdlog::debug("map: {}", typeid(map).name());
 
-                                        spdlog::debug("portal to '{}' triggered ... ", to_string(value->target));
-                                        spdlog::debug("view center: {}", to_string(view.center()));
-                                        spdlog::debug("value->position: {}", to_string(value->position));
+                                    std::visit(overloaded{
+                                            [this](portal const &v) {
+                                                spdlog::debug("portal to '{}' triggered ... ", to_string(v.target));
+                                                // select target (new) map
+                                                std::visit(
+                                                        [this, &v](auto e) {
+                                                            const auto target_map = tile_map_by_tag_t<decltype(e), decltype(maps)>{};
+                                                            const auto map_size = rect{{0, 0}, extent(target_map)};
 
-                                        // select new map
-                                        std::visit(
-                                                [this](auto e) { maps = tile_map_by_tag_t<decltype(e), decltype(maps)>{}; },
-                                                value->target);
+                                                            // move player
+                                                            player.position = v.position;
+                                                            // set new map
+                                                            maps = target_map;
 
-                                        //! \todo  position map
-
-                                        const auto map_size = rect{{0, 0},
-                                                                   std::visit([](auto m) { return extent(m); }, maps)};
-                                        spdlog::debug("map_size: {}", to_string(map_size));
-
-                                        if (view.is_inside(map_size)) {
-                                            spdlog::debug("new map is smaller than view, therefore center it");
-                                            map_offset = view.center() - map_size.center();
-                                            // player.position = map_offset + value->position;
-                                        } else if (view.height() < map_size.height() &&
-                                                   view.width() > map_size.width()) {
-                                            spdlog::debug(
-                                                    "new map is higher than view, therefore center around player");
-                                            map_offset = view.center() - value->position + point{0, 1};
-                                            // player.position = view.center(); // map_offset + value->position - point{0,1};
-                                        } else {
-                                            spdlog::debug("new map is GREATER than view,!!!");
-                                            map_offset =
-                                                    view.center() - value->position +
-                                                    point{1, 0}; // point{6,-9}; // - value->position;
-                                            // player.position = view.center();
-                                        }
-                                        spdlog::debug("new offset: {}", to_string(map_offset));
-                                    }
-                                    if (const auto value = std::get_if<chest>(&map.entities[p.y][p.x]); value) {
-                                        spdlog::debug("chest triggered at ({},{}) ", p.y, p.x);
-                                    }
-                                },
-                                maps);
+                                                            if (view.is_inside(map_size)) {
+                                                                spdlog::debug(
+                                                                        "new map is smaller than view, therefore center it");
+                                                                map_offset = map_size.centered(
+                                                                        view.extent).top_left_position;
+                                                                // reset camera
+                                                                camera = {0, 0};
+                                                            } else {
+                                                                spdlog::debug(
+                                                                        "new map is bigger than view");
+                                                                map_offset = {0, 0};
+                                                                // move camera
+                                                                move_camera(player.position.x, player.position.y);
+                                                            }
+                                                        },
+                                                        v.target);
+                                            },
+                                            [](chest const &v) {
+                                                spdlog::debug("found chest!");
+                                            },
+                                            [](auto) {
+                                                // nothing
+                                            }
+                                    }, map.entities[p.y][p.x]);
+                                }, maps);
                     };
 
                     if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) ||
                         IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-                        trigger_portal(screen_to_map_pos(player.position));
+                        trigger(player.position);
                     }
 
                     framesCounter++;
@@ -319,9 +318,6 @@ namespace orpg {
                 // Draw to player
                 DrawRectangleV(world_to_screen(player.position - camera) + (screen_offset / 2), player.size,
                                player.color);
-
-                // Draw to camera
-                // DrawRectangleV(world_to_screen(camera) + (screen_offset / 2), player.size, PINK);
 
                 if (pause) {
                     draw_pause_overlay();
@@ -414,7 +410,7 @@ namespace orpg {
         void draw_map_entities(Map map) const noexcept {
             const auto func2 = [&map](auto row, auto col) {
                 return std::visit(overloaded{
-                                          [](portal) { return YELLOW; },
+                                          [](portal) { return PINK; },
                                           [](blocked) { return BLACK; },
                                           [](chest) { return GOLD; },
                                           [](auto e) { return BLANK; },
