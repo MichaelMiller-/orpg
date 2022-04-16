@@ -5,20 +5,6 @@
 
 namespace orpg {
 
-    //! \todo remove
-    struct chest {
-        friend auto &operator<<(std::ostream &os, chest const &obj) {
-            return os << "var1";
-        }
-    };
-
-    //! \todo remove
-    struct var2 {
-        friend auto &operator<<(std::ostream &os, var2 const &obj) {
-            return os << "var2";
-        }
-    };
-
     struct portal {
         friend auto &operator<<(std::ostream &os, portal const &obj) {
             return os << "portal";
