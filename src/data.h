@@ -25,7 +25,7 @@ namespace orpg
             {0, 1, 2, 3, 4, 5},
     };
     static constexpr entities_t entities_house1[7][6] = {
-            {none{}, portal{world1{}, {5, 16}}, none{},    none{}, none{}, none{}},
+            {none{}, portal{world1{}, {4, 16}}, none{},    none{}, none{}, none{}},
             {none{}, none{}, none{},    none{}, none{}, none{}},
             {none{}, none{}, none{},    none{}, none{}, portal{house2{}, {0, 2}}},
             {none{}, none{}, none{},    none{}, none{}, none{}},
