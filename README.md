@@ -14,10 +14,11 @@
 - collision detection with entities
 - collision detection with the edge of the map
 
-## Enitity types
-| Entity | Color |
-|---|---|
+## Entity types
+| Entity  | Color |
+|---------|-------|
 | blocked | black |
+| chest   | gold  |
 
 ### Screenshot
 ![current-dev-version](data/2022-04-14_screenshot.png)
