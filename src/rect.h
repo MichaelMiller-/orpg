@@ -62,7 +62,7 @@ namespace orpg {
 
         [[nodiscard]] constexpr auto is_inside(point pt) const noexcept -> bool {
             return pt.x >= top_left_position.x && pt.y >= top_left_position.y &&
-                   pt.x <= (top_left_position.x + extent.width) && pt.y <= (top_left_position.y + extent.height);
+                   pt.x < (top_left_position.x + extent.width) && pt.y < (top_left_position.y + extent.height);
         }
 
         [[nodiscard]] constexpr auto is_inside(rect const &other) const noexcept -> bool {
