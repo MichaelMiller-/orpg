@@ -120,17 +120,19 @@ namespace orpg {
             screen_offset.y = cfg.window.height() % SQUARE_SIZE;
             spdlog::debug("window offset: ({},{})", screen_offset.x, screen_offset.y);
 
-            const auto ext = std::visit([](auto map) { return extent(map); }, maps);
-            spdlog::debug("extents initial map: {}x{}", ext.width, ext.height);
+            const auto ext = rect{ {0,0}, std::visit([](auto map) { return extent(map); }, maps) };
+            // spdlog::debug("extents initial map: {}x{}", ext.width, ext.height);
 
-            // center first map
             map_offset = {0, 0}; // view.center() - std::visit([](auto map) { return center(map); }, maps);
-            // map_offset.x = (cfg.window.width() - (ext.width * SQUARE_SIZE)) / 2;
-            // map_offset.y = (cfg.window.height() - (ext.height * SQUARE_SIZE)) / 2;
+
+            if (view.is_inside(ext))
+            {
+               map_offset = ext.centered(view.extent).top_left_position;
+            }
+
             spdlog::debug("map offset: ({},{})", map_offset.x, map_offset.y);
 
-            player.position = {2, 2}; // view.center(); // world position
-            // camera = player.position;
+            player.position = point{2, 2}; // view.center(); // world position
         }
 
         void update() {
@@ -150,7 +152,6 @@ namespace orpg {
             spdlog::debug("movement delta ({},{}) ", delta.x, delta.y);
 
             const auto move_allowed = [this](point pos) {
-                return true;
                 return std::visit(
                         [p = pos](auto map) { return std::get_if<blocked>(&map.entities[p.y][p.x]) == nullptr; },
                         maps);
@@ -158,13 +159,18 @@ namespace orpg {
 
             // movement is blocked by an entity
             if (move_allowed(delta) == false) {
-                spdlog::debug("player movement to ({},{}) is blocked", delta.x, delta.y);
+                spdlog::debug("player movement to ({},{}) is blocked by an entity", delta.x, delta.y);
                 return;
             }
 
             const auto map_bounding_rect = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
             // spdlog::debug("map_bounding_rect: {} ", to_string(map_bounding_rect));
 
+            if (map_bounding_rect.is_inside(delta) == false) {
+                spdlog::debug("player movement to ({},{}) ----- map extent", delta.x, delta.y);
+                return;
+            }
+#if 0
             const auto map_border = [this, map_bounding_rect]() {
                 if (view.is_inside(map_bounding_rect)) {
                     return map_bounding_rect;
@@ -179,6 +185,8 @@ namespace orpg {
             } else {
                 spdlog::debug("player movement to ({},{}) is blocked", delta.x, delta.y);
             }
+#endif
+            player.position = delta;
 
             if (view.is_inside(map_bounding_rect)) {
                 // map is smaller than viewport -> no camera movement
@@ -293,8 +301,8 @@ namespace orpg {
 
         template<typename T>
         [[nodiscard]] auto world_to_screen(T v) const noexcept -> Vector2 {
-            return {static_cast<decltype(Vector2::x)>(v.x * SQUARE_SIZE),
-                    static_cast<decltype(Vector2::y)>(v.y * SQUARE_SIZE)};
+            return {static_cast<decltype(Vector2::x)>((v.x + map_offset.x) * SQUARE_SIZE),
+                    static_cast<decltype(Vector2::y)>((v.y + map_offset.y) * SQUARE_SIZE)};
         }
 
         void draw() const noexcept {
@@ -306,7 +314,7 @@ namespace orpg {
             if (!gameOver) {
 
                 std::visit([this](auto map) { draw_map(map); }, maps);
-                // std::visit([this](auto map) { draw_map_entities(map); }, maps);
+                std::visit([this](auto map) { draw_map_entities(map); }, maps);
 
                 // Draw to player
                 DrawRectangleV(world_to_screen(player.position - camera) + (screen_offset / 2), player.size,
@@ -358,16 +366,16 @@ namespace orpg {
         template<typename Function>
         void draw_tile(int x, int y, Function f) const {
             const auto dt = point{x, y} + camera;
-            DrawRectangleV(Vector2{static_cast<decltype(Vector2::x)>((x * SQUARE_SIZE) + map_offset.x),
-                                   static_cast<decltype(Vector2::y)>((y * SQUARE_SIZE) + map_offset.y)},
+            DrawRectangleV(Vector2{static_cast<decltype(Vector2::x)>((x + map_offset.x) * SQUARE_SIZE),
+                                   static_cast<decltype(Vector2::y)>((y + map_offset.y) * SQUARE_SIZE)},
                            {SQUARE_SIZE, SQUARE_SIZE}, std::invoke(f, dt.y, dt.x));
         }
 
-        template<typename Function>
+        template<typename Map, typename Function>
         void draw_tiles(Function f) const noexcept {
-            for (auto y = 0; y < view.height(); ++y) {
-                for (auto x = 0; x < view.width(); ++x) {
-                    draw_tile(y, x, std::move(f));
+            for (auto y = 0; y < std::min(view.height(), Map::rows_v); ++y) {
+                for (auto x = 0; x < std::min(view.width(), Map::cols_v); ++x) {
+                    draw_tile(x, y, std::move(f));
                 }
             }
         }
@@ -375,10 +383,6 @@ namespace orpg {
         template<typename Map>
         void draw_map(Map map) const noexcept {
             const auto func2 = [&map](auto row, auto col) {
-
-                if (row > Map::rows_v || col > Map::cols_v)
-                    return Color{0, 0, 0, 0};
-
                 const auto index = map.tiles[row][col];
                 switch (index) {
                     case 0:
@@ -402,42 +406,23 @@ namespace orpg {
                 }
                 return Color{30, 30, 55, 255};
             };
-#if 0
-            draw_tiles(func2);
-#else
 
-            for (auto y = 0; y < view.height(); ++y) {
-                for (auto x = 0; x < view.width(); ++x) {
-
-                    const auto dt = point{x, y} + camera;
-                    DrawRectangleV(Vector2{static_cast<decltype(Vector2::x)>((x * SQUARE_SIZE) + map_offset.x),
-                                           static_cast<decltype(Vector2::y)>((y * SQUARE_SIZE) + map_offset.y)},
-                                   {SQUARE_SIZE, SQUARE_SIZE}, std::invoke(func2, dt.y, dt.x));
-
-                }
-            }
-#endif
+            draw_tiles<Map>(func2);
         }
 
         template<typename Map>
         void draw_map_entities(Map map) const noexcept {
             const auto func2 = [&map](auto row, auto col) {
                 return std::visit(overloaded{
-                                          [](portal) {
-                                              return Color{255, 255, 0, 255};
-                                          },
-                                          [](blocked) {
-                                              return Color{0, 0, 0, 255};
-                                          },
+                                          [](portal) { return YELLOW; },
+                                          [](blocked) { return BLACK; },
                                           [](chest) { return GOLD; },
-                                          [](auto e) {
-                                              return Color{0, 0, 0, 0};
-                                          },
+                                          [](auto e) { return BLANK; },
                                   },
                                   map.entities[row][col]);
             };
 
-            draw_tiles(func2);
+            draw_tiles<Map>(func2);
         }
 
         void draw_pause_overlay() const noexcept {
