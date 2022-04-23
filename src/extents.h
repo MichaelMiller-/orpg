@@ -36,7 +36,7 @@ namespace orpg {
 
         //! \todo write test
         [[nodiscard]] constexpr auto center() const noexcept -> point {
-            return {static_cast<decltype(point::x)>(width / 2), static_cast<decltype(point::y)>(height / 2)};
+            return {width / 2, height / 2};
         }
 
 // #ifndef NDEBUG
