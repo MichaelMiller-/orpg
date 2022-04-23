@@ -26,10 +26,8 @@
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #pragma clang diagnostic ignored "-Wenum-compare"
 #pragma clang diagnostic ignored "-Wnarrowing"
-#pragma clang diagnostic ignored "-Wuseless-cast"
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wshadow"
-#pragma clang diagnostic ignored "-Walloc-size-larger-than="
 #endif
 
 #pragma GCC diagnostic push
@@ -282,7 +280,7 @@ namespace orpg
 
          spdlog::info("connect signals");
          {
-            auto& signal = registry.set<trigger_portal_t>();
+            auto& signal = registry.ctx().emplace<trigger_portal_t>();
             entt::sink sink{signal};
             sink.connect<&application::handle_portal>(*this);
          }
@@ -462,7 +460,7 @@ namespace orpg
 
                   portals.each([this, player_pos](auto, position const& pos, auto const& port) {
                      if (player_pos == pos) {
-                        registry.ctx<trigger_portal_t>().publish(port);
+                        registry.ctx().at<trigger_portal_t>().publish(port);
                      }
                   });
                });
