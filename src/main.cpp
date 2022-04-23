@@ -14,6 +14,7 @@
 #include "tile_map.h"
 #include "settings.h"
 #include "components/player.h"
+#include "components/npc.h"
 
 #define ORPG_IRGNORE_WARNING(e) \
 
@@ -52,10 +53,12 @@
 #include <spdlog/spdlog.h>
 
 #include <cstdarg>
-#include <ranges>
+// #include <ranges>
 #include <variant>
 
 #include <entt/entt.hpp>
+
+// #include <nlohmann/json.hpp>
 
 auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept { return Vector2{lhs.x + rhs.x, lhs.y + rhs.y}; }
 
@@ -97,16 +100,29 @@ namespace orpg
    struct active
    {
    };
-   struct npc
-   {
-      std::string phrase{};
-   };
 
    template <typename Enum>
    constexpr auto index_of(Enum e) -> std::underlying_type_t<Enum>
    {
       return static_cast<typename std::underlying_type<Enum>::type>(e);
    }
+
+#if 0
+   struct npc1
+   {
+      position pos{};
+      std::string text{};
+      std::string script{};
+   };
+      inline void to_json(nlohmann::json& j, npc1 const& obj)
+      {
+         j["text"] = obj.text;
+      }
+      inline void from_json(nlohmann::json const& j, npc1& obj)
+      {
+         j.at("text").get_to(obj.text);
+      }
+#endif
 
    class application
    {
