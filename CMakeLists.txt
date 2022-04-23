@@ -71,7 +71,8 @@ endif()
 
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(EnTT CONFIG REQUIRED)
+find_package(EnTT 3.10 REQUIRED)
+# find_package(sol2 CONFIG REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
@@ -79,6 +80,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohm
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 # target_link_libraries(${PROJECT_NAME} PRIVATE interface2sec21)
 target_link_libraries(${PROJECT_NAME} PRIVATE EnTT::EnTT)
+# target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
 
 include(CTest)
 if (BUILD_TESTING) # option is created by CTest
