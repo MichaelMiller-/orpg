@@ -16,14 +16,15 @@
 - portal system. allows switching between different maps
 
 ## Entity types
-| Entity  | Color |
-|---------|-------|
-| blocked | black |
-| chest   | gold  |
-| portal  | pink  |
+| Entity  | Color   |
+|---------|---------|
+| player  | skyblue |
+| blocked | black   |
+| chest   | gold    |
+| portal  | pink    |
+| npc     | grey    |
 
 ### Screenshot
 ![current-dev-version](data/2022-04-14_screenshot.png)
 
 Try the current dev-version [online](http://orpg.pb-miller.de/orpg.html)
-
