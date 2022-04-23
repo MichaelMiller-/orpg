@@ -5,7 +5,7 @@ project(orpg
         )
 
 
-add_subdirectory(interface2sec21)
+# add_subdirectory(interface2sec21)
 # add_subdirectory(interface2raylib)
 
 include(GNUInstallDirs)
@@ -76,7 +76,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_head
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 # target_link_libraries(${PROJECT_NAME} PRIVATE interface2raylib)
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
-target_link_libraries(${PROJECT_NAME} PRIVATE interface2sec21)
+# target_link_libraries(${PROJECT_NAME} PRIVATE interface2sec21)
 target_link_libraries(${PROJECT_NAME} PRIVATE EnTT::EnTT)
 
 include(CTest)
