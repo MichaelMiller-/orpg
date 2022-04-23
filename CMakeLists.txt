@@ -24,6 +24,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${PROJECT_BINARY_DIR})
 
 if (EMSCRIPTEN)
+  include(ExternalProject)
   ## TODO: as of April 2022 vcpkg has no working raylib:wasm32-emspripten package, therefore use this workaround
   ExternalProject_Add(
           raylib-external
