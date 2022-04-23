@@ -25,7 +25,8 @@ jobs:
           sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
           clang --version
           sudo pip install gcovr
-          
+          sudo apt install -y libboost-all-dev
+
       - name: Install Dependencies
         shell: bash
         working-directory: ${{runner.workspace}}
