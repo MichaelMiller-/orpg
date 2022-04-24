@@ -30,6 +30,7 @@
 #pragma clang diagnostic ignored "-Wshadow"
 #endif
 
+#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -41,12 +42,17 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
 
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
-#pragma GCC diagnostic pop
+#if defined(__GNUC__)
+   #pragma GCC diagnostic pop
+#endif
+
 
 #include <spdlog/spdlog.h>
 
