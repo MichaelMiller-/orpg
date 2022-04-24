@@ -15,6 +15,7 @@ include(CMakePrintHelpers)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 configure_file(${PROJECT_SOURCE_DIR}/src/config.h.in ${PROJECT_BINARY_DIR}/config.h)
+configure_file(${PROJECT_SOURCE_DIR}/data/test.lua ${PROJECT_BINARY_DIR}/test.lua COPYONLY)
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 
@@ -24,38 +25,43 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${PROJECT_BINARY_DIR})
 
 if (EMSCRIPTEN)
-  include(ExternalProject)
-  ## TODO: as of April 2022 vcpkg has no working raylib:wasm32-emspripten package, therefore use this workaround
-  ExternalProject_Add(
-          raylib-external
+  target_compile_definitions(${PROJECT_NAME} PRIVATE ORPG_WEB_BUILD)
+
+  FetchContent_Declare(
+          raylib
           GIT_REPOSITORY https://github.com/raysan5/raylib
           GIT_PROGRESS TRUE
-          CMAKE_ARGS -Wno-dev
-          -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-          -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-          -D PLATFORM=Web
-          -D EMSCRIPTEN=ON
-          -D EMSCRIPTEN_FORCE_COMPILERS=ON
-          -D BUILD_EXAMPLES=OFF
-          -D OPENGL_VERSION=OFF
-          -D USE_EXTERNAL_GLFW=OFF
-          -D USE_AUDIO=OFF
-          -D CMAKE_BUILD_TYPE=Release
-          -D CMAKE_TOOLCHAIN_FILE:PATH=${VCPKG_CHAINLOAD_TOOLCHAIN_FILE}
-          -D CMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
   )
 
-  configure_file(${PROJECT_SOURCE_DIR}/data/template.html ${PROJECT_BINARY_DIR}/template.html COPYONLY)
+  FetchContent_GetProperties(raylib)
+  if (NOT raylib_POPULATED)
+    set(BUILD_TESTING OFF)
+    set(PLATFORM Web)
+    set(EMSCRIPTEN ON)
+    set(EMSCRIPTEN_FORCE_COMPILERS ON)
+    set(BUILD_EXAMPLES OFF)
+    set(USE_EXTERNAL_GLFW OFF)
+    set(USE_AUDIO OFF)
+    set(CMAKE_BUILD_TYPE Release)
+    FetchContent_Populate(raylib)
 
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY --shell-file template.html")
-  # This line is used to set your executable to build with the emscripten html template so taht you can directly open it.
-  set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    cmake_print_variables(raylib_SOURCE_DIR)
+    cmake_print_variables(raylib_BINARY_DIR)
 
-  add_dependencies(${PROJECT_NAME} raylib-external)
+    add_subdirectory(${raylib_SOURCE_DIR} ${raylib_BINARY_DIR})
+    list(APPEND CMAKE_MODULE_PATH ${raylib_SOURCE_DIR}/cmake)
+    list(APPEND CMAKE_PREFIX_PATH ${raylib_SOURCE_DIR}/cmake)
+  endif()
 
-  target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/lib)
 else()
+  target_compile_definitions(${PROJECT_NAME} PRIVATE ORPG_DESKTOP_BUILD)
+
   find_package(raylib CONFIG REQUIRED)
+  find_package(sol2 CONFIG REQUIRED)
+  find_package(Lua REQUIRED)
+
+  target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
 endif ()
 
 ## raygui
@@ -72,7 +78,6 @@ endif()
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(EnTT 3.10 REQUIRED)
-# find_package(sol2 CONFIG REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
@@ -80,7 +85,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohm
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 # target_link_libraries(${PROJECT_NAME} PRIVATE interface2sec21)
 target_link_libraries(${PROJECT_NAME} PRIVATE EnTT::EnTT)
-# target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
+
 
 include(CTest)
 if (BUILD_TESTING) # option is created by CTest
