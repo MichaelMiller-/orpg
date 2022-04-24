@@ -43,6 +43,7 @@ jobs:
         ./vcpkg install spdlog
         ./vcpkg install raylib
         ./vcpkg install entt
+        ./vcpkg install sol2
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
