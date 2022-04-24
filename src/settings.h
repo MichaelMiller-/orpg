@@ -18,3 +18,22 @@ namespace orpg
       bool fullscreen{false};
    };
 }
+
+#include <nlohmann/json.hpp>
+
+namespace orpg
+{
+   inline void to_json(nlohmann::json& j,settings const& obj)
+   {
+      j["window_title"] = obj.window_title;
+      j["window"] = obj.window;
+      j["fullscreen"] = obj.fullscreen;
+   }
+
+   inline void from_json(nlohmann::json const& j,settings& obj)
+   {
+      j.at("window_title").get_to(obj.window_title);
+      j.at("window").get_to(obj.window);
+      j.at("fullscreen").get_to(obj.fullscreen);
+   }
+}

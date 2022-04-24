@@ -95,3 +95,21 @@ namespace orpg
    }
    // #endif
 } // namespace orpg
+
+
+#include <nlohmann/json.hpp>
+
+namespace orpg
+{
+   inline void to_json(nlohmann::json& j, rect const& obj)
+   {
+      j["top_left_position"] = obj.top_left_position;
+      j["extent"] = obj.extent;
+   }
+
+   inline void from_json(nlohmann::json const& j, rect& obj)
+   {
+      j.at("top_left_position").get_to(obj.top_left_position);
+      j.at("extent").get_to(obj.extent);
+   }
+} // namespace orpg
