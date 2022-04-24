@@ -2,21 +2,22 @@
 #include "components/drawable.h"
 #include "components/layers.h"
 #include "components/movement_speed.h"
+#include "components/npc.h"
+#include "components/player.h"
 #include "components/position.h"
 #include "components/triggerable.h"
 #include "components/velocity.h"
 #include "config.h"
 #include "data.h"
 #include "entities.h"
+#include "file_io.h"
 #include "point.h"
 #include "rect.h"
+#include "settings.h"
 #include "tags.h"
 #include "tile_map.h"
-#include "settings.h"
-#include "components/player.h"
-#include "components/npc.h"
 
-#define ORPG_IRGNORE_WARNING(e) \
+#define ORPG_IRGNORE_WARNING(e)
 
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -50,14 +51,18 @@
 #include <raygui.h>
 
 #if defined(__GNUC__)
-   #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
+#if defined(PLATFORM_WEB)
+   #include <emscripten/emscripten.h>
+#endif
 
 #include <spdlog/spdlog.h>
 
 #include <cstdarg>
 // #include <ranges>
+#include <memory>
 #include <variant>
 
 #include <entt/entt.hpp>
@@ -65,7 +70,7 @@
 // #include <nlohmann/json.hpp>
 
 #ifdef ORPG_DESKTOP_BUILD
-   #include <sol/sol.hpp>
+#include <sol/sol.hpp>
 #endif
 
 auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept { return Vector2{lhs.x + rhs.x, lhs.y + rhs.y}; }
@@ -115,24 +120,7 @@ namespace orpg
       return static_cast<typename std::underlying_type<Enum>::type>(e);
    }
 
-#if 0
-   struct npc1
-   {
-      position pos{};
-      std::string text{};
-      std::string script{};
-   };
-      inline void to_json(nlohmann::json& j, npc1 const& obj)
-      {
-         j["text"] = obj.text;
-      }
-      inline void from_json(nlohmann::json const& j, npc1& obj)
-      {
-         j.at("text").get_to(obj.text);
-      }
-#endif
-
-   class application
+   class application final
    {
       using trigger_portal_t = entt::sigh<void(portal)>;
 
@@ -209,16 +197,6 @@ namespace orpg
          registry.emplace<movement_speed>(entity, 1.f);
          registry.emplace<player>(entity);
          registry.emplace<collision>(entity);
-
-         // registry.assign<Health>(id, 3);
-         // registry.assign<Active>(id);
-         // auto &rect = registry.assign<RectCollider>(id);
-         // registry.assign<NullVelocityCollision>(id);
-         // registry.assign<CollisionLayer>(id, LayersID::PLAYER);
-         // registry.assign<ParticleData>(id);
-         // registry.assign<Dash>(id);
-         // rect.rect.w = sprite.rect.w * sprite.scale.x();
-         // rect.rect.h = sprite.rect.h * sprite.scale.y();
       }
 
       template <typename T>
@@ -238,7 +216,7 @@ namespace orpg
       }
 
    public:
-      application(settings defaults) : cfg{std::move(defaults)}
+      explicit application(settings defaults) : cfg{std::move(defaults)}
       {
          SetTraceLogCallback([](auto log_level, auto text, auto args) {
             // boilerplate to copy the arguments into a buffer
@@ -268,9 +246,7 @@ namespace orpg
          InitWindow(cfg.window.width(), cfg.window.height(), cfg.window_title.c_str());
       }
 
-      ~application() { destroy(); }
-
-      void destroy() {}
+      ~application() = default;
 
       void init()
       {
@@ -585,7 +561,8 @@ namespace orpg
          }
       }
 
-      void draw_gui() const noexcept {
+      void draw_gui() const noexcept
+      {
 #if 0
          int width, height, roundness, lineThick, segments;
          // Draw GUI controls
@@ -690,6 +667,8 @@ namespace orpg
    };
 } // namespace orpg
 
+std::unique_ptr<orpg::application> app{nullptr};
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
    try {
@@ -699,20 +678,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
       spdlog::info("Starting application: {} {}.{}", EXECUTABLE_NAME, VERSION_MAJOR, VERSION_MINOR);
       spdlog::debug("enTT version: {}.{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR);
 
-      auto app = orpg::application{{.window_title = "orpg"}};
-      app.init();
+      const auto settings =
+         orpg::read_from_json<orpg::settings>(BINARY_DIRECTORY / std::filesystem::path{"preferences.json"});
+
+      app.reset(new orpg::application{settings});
+      app->init();
 
 #if defined(PLATFORM_WEB)
-      emscripten_set_main_loop([&]() { app.update(); }, 60, 1);
+      emscripten_set_main_loop([]() { app->update(); }, 60, 1);
 #else
       SetTargetFPS(60);
 
       while (!WindowShouldClose()) // Detect window close button or ESC key
       {
-         app.update();
+         app->update();
       }
 #endif
-      app.destroy();
       CloseWindow();
 
    } catch (std::exception& ex) {
