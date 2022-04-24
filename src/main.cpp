@@ -64,6 +64,10 @@
 
 // #include <nlohmann/json.hpp>
 
+#ifdef ORPG_DESKTOP_BUILD
+   #include <sol/sol.hpp>
+#endif
+
 auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept { return Vector2{lhs.x + rhs.x, lhs.y + rhs.y}; }
 
 auto operator+(Vector2 const& lhs, orpg::point const& rhs) noexcept
@@ -320,13 +324,13 @@ namespace orpg
 
    private:
       template <typename Layer>
-      void clear()
+      void clear() noexcept
       {
          const auto entities = registry.view<Layer>();
          registry.destroy(entities.begin(), entities.end());
       }
 
-      void handle_portal(portal const& p)
+      void handle_portal(portal const& p) noexcept
       {
          spdlog::debug("portal to '{}' triggered ... ", to_string(p.target));
          // select target (new) map
@@ -341,7 +345,7 @@ namespace orpg
       }
 
       template <typename Map>
-      void load_map(Map map)
+      void load_map(Map map) noexcept
       {
          clear<layer2>();
 
@@ -372,9 +376,9 @@ namespace orpg
 
       // const auto is_in_viewport = [this](auto ent) { return view.is_inside(registry.get<position>(ent)); };
 
-      void update_view() {}
+      void update_view() noexcept {}
 
-      void collision_detection()
+      void collision_detection() noexcept
       {
          registry.view<player, position, velocity>().each([this](auto, position const& pos, velocity& vel) {
             const auto map_size = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
@@ -389,7 +393,7 @@ namespace orpg
          });
       }
 
-      void player_movement(const float) // dt
+      void player_movement(const float) noexcept // dt
       {
          registry.view<player, position, velocity>().each([](auto, position& pos, velocity const& vel) {
             pos.x += vel.dx;
@@ -397,7 +401,7 @@ namespace orpg
          });
       }
 
-      void update_camera()
+      void update_camera() noexcept
       {
          auto& active_camera = single_entity<rpc_2d_camera>();
          const auto map_size = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
@@ -418,7 +422,7 @@ namespace orpg
          active_camera.position.y = std::min(my, map_size.height() - active_camera.viewport.height());
       }
 
-      auto move_player(auto dx, auto dy)
+      auto move_player(auto dx, auto dy) noexcept
       {
          registry.view<player, velocity>().each([dx, dy](auto, velocity& vel) {
             vel.dx = dx;
@@ -426,7 +430,7 @@ namespace orpg
          });
       }
 
-      void update_input()
+      void update_input() noexcept
       {
          if (IsKeyPressed(KEY_F12)) {
             spdlog::info("Take screenshot: {}", "screenshot.png");
@@ -699,7 +703,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
       app.init();
 
 #if defined(PLATFORM_WEB)
-      emscripten_set_main_loop([=]() { app.update(); }, 60, 1);
+      emscripten_set_main_loop([&]() { app.update(); }, 60, 1);
 #else
       SetTargetFPS(60);
 
