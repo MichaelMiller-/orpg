@@ -16,6 +16,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 configure_file(${PROJECT_SOURCE_DIR}/src/config.h.in ${PROJECT_BINARY_DIR}/config.h)
 configure_file(${PROJECT_SOURCE_DIR}/data/test.lua ${PROJECT_BINARY_DIR}/test.lua COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/data/preferences.json ${PROJECT_BINARY_DIR}/preferences.json COPYONLY)
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 
