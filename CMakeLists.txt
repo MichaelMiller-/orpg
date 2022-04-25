@@ -26,6 +26,10 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${PROJECT_BINARY_DIR})
 
 if (EMSCRIPTEN)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
+  set(CMAKE_EXECUTABLE_SUFFIX ".html")
+
   target_compile_definitions(${PROJECT_NAME} PRIVATE ORPG_WEB_BUILD)
 
   FetchContent_Declare(
@@ -53,6 +57,9 @@ if (EMSCRIPTEN)
     list(APPEND CMAKE_MODULE_PATH ${raylib_SOURCE_DIR}/cmake)
     list(APPEND CMAKE_PREFIX_PATH ${raylib_SOURCE_DIR}/cmake)
   endif()
+
+  # find_package(GLEW CONFIG REQUIRED)
+  # target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
 
 else()
   target_compile_definitions(${PROJECT_NAME} PRIVATE ORPG_DESKTOP_BUILD)
