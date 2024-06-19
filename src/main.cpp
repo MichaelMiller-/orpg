@@ -551,12 +551,12 @@ namespace orpg
              : pos_and_extents{rc}, text{caption}, on_clicked{click}
          {
          }
-
+#if 0
          static auto to_rect(rect rc) -> Rectangle
          {
             return {rc.top_left_position.x, rc.top_left_position.y, rc.width(), rc.height()};
          }
-
+#endif
          void draw()
          {
 #if TODO
@@ -586,7 +586,9 @@ namespace orpg
 
       void draw_gui() const noexcept
       {
+#if 0
          button b1{{400, 40, 105, 20}, "WTF WTF WTF", []() { spdlog::info("Button clicked"); }};
+#endif
 #if 0
          int width, height, roundness, lineThick, segments;
          // Draw GUI controls

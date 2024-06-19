@@ -3,12 +3,12 @@ project(orpg
         VERSION 0.0.1
         DESCRIPTION "Multiplayer RPG")
 
-# add_subdirectory(interface2sec21)
-# add_subdirectory(interface2raylib)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 include(GNUInstallDirs)
 include(FetchContent)
 include(CMakePrintHelpers)
+include(CompilerWarnings)
 
 set(CMAKE_CXX_STANDARD 20)
 # set(CMAKE_CXX_STANDARD_REQUIRED On)
@@ -20,6 +20,7 @@ configure_file(src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 configure_file(data/preferences.json ${CMAKE_CURRENT_BINARY_DIR}/preferences.json COPYONLY)
 
 add_executable(orpg)
+enable_warnings(orpg)
 
 target_sources(orpg PRIVATE  src/main.cpp)
 
