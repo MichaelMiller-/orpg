@@ -41,7 +41,7 @@
 // #include <nlohmann/json.hpp>
 
 #ifdef ORPG_DESKTOP_BUILD
-#include <sol/sol.hpp>
+
 #endif
 
 auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept { return Vector2{lhs.x + rhs.x, lhs.y + rhs.y}; }
