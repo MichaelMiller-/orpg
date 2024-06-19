@@ -17,45 +17,16 @@
 #include "tags.h"
 #include "tile_map.h"
 
-#define ORPG_IRGNORE_WARNING(e)
-
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#pragma clang diagnostic ignored "-Wconversion"
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma clang diagnostic ignored "-Wenum-compare"
-#pragma clang diagnostic ignored "-Wnarrowing"
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#pragma clang diagnostic ignored "-Wshadow"
-#endif
-
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wenum-compare"
-#pragma GCC diagnostic ignored "-Wnarrowing"
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Walloc-size-larger-than="
-#pragma GCC diagnostic ignored "-Wunused-result"
-#endif
-
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
-#include <raygui.h>
+// #include <raygui.h>
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 
 #if defined(PLATFORM_WEB)
-   #include <emscripten/emscripten.h>
+#include <emscripten/emscripten.h>
 #endif
 
 #include <spdlog/spdlog.h>
@@ -266,6 +237,7 @@ namespace orpg
 
          spdlog::info("connect signals");
          {
+            // store signal in the registry
             auto& signal = registry.ctx().emplace<trigger_portal_t>();
             entt::sink sink{signal};
             sink.connect<&application::handle_portal>(*this);
@@ -424,21 +396,21 @@ namespace orpg
             // dispatcher.enqueue<event::game_pause>();
          }
          if (!pause) {
-            if (IsKeyPressed(KEY_RIGHT) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
+            if (IsKeyPressed(KEY_RIGHT) || IsGamepadButtonReleased(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
                move_player(1, 0);
             }
-            if (IsKeyPressed(KEY_LEFT) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
+            if (IsKeyPressed(KEY_LEFT) || IsGamepadButtonReleased(0, GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
                move_player(-1, 0);
             }
-            if (IsKeyPressed(KEY_UP) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+            if (IsKeyPressed(KEY_UP) || IsGamepadButtonReleased(0, GAMEPAD_BUTTON_LEFT_FACE_UP)) {
                move_player(0, -1);
             }
-            if (IsKeyPressed(KEY_DOWN) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+            if (IsKeyPressed(KEY_DOWN) || IsGamepadButtonReleased(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
                move_player(0, 1);
             }
 
             if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) ||
-                IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+                IsGamepadButtonReleased(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
 
                registry.view<player, position>().each([this](auto, position const& player_pos) {
                   const auto portals =
@@ -446,7 +418,7 @@ namespace orpg
 
                   portals.each([this, player_pos](auto, position const& pos, auto const& port) {
                      if (player_pos == pos) {
-                        registry.ctx().at<trigger_portal_t>().publish(port);
+                        registry.ctx().get<trigger_portal_t>().publish(port);
                      }
                   });
                });
@@ -561,8 +533,60 @@ namespace orpg
          }
       }
 
+      struct room
+      {
+         bool light_on{false};
+         std::function<void(bool)> light_on_changed{};
+      };
+
+      struct button
+      {
+         std::function<void()> on_clicked{};
+         rect pos_and_extents{};
+         std::string_view text{};
+
+         button(rect rc, std::string_view caption) : pos_and_extents{rc}, text{caption} {}
+
+         button(rect rc, std::string_view caption, std::function<void()> click)
+             : pos_and_extents{rc}, text{caption}, on_clicked{click}
+         {
+         }
+
+         static auto to_rect(rect rc) -> Rectangle
+         {
+            return {rc.top_left_position.x, rc.top_left_position.y, rc.width(), rc.height()};
+         }
+
+         void draw()
+         {
+#if TODO
+            if (GuiButton(to_rect(pos_and_extents), text.data()) && on_clicked) {
+               std::invoke(on_clicked);
+            }
+#endif
+         }
+      };
+
+      struct ui_component
+      {
+         //         button btn{};
+         ui_component(std::shared_ptr<room> r, int* parent = nullptr)
+         {
+            // btn.on_clicked = ([]{
+            // r->light_on = !r->light_on;
+            // r->light_on_changed(light_on);
+            // });
+            auto update = [=] {
+               // btn.set_text(r->light_on ? "Turn off!" : "Turn on!");
+            };
+            // room_ = ->light_on_changed = update;
+            update();
+         }
+      };
+
       void draw_gui() const noexcept
       {
+         button b1{{400, 40, 105, 20}, "WTF WTF WTF", []() { spdlog::info("Button clicked"); }};
 #if 0
          int width, height, roundness, lineThick, segments;
          // Draw GUI controls
@@ -576,6 +600,8 @@ namespace orpg
          debug_cfg.draw_entities = GuiCheckBox((Rectangle){ 640, 350, 20, 20 }, "draw entities", debug_cfg.draw_entities);
          debug_cfg.draw_overlays = GuiCheckBox((Rectangle){ 640, 380, 20, 20 }, "draw entities", debug_cfg.draw_overlays);
          debug_cfg.draw_weather = GuiCheckBox((Rectangle){ 640, 410, 20, 20 }, "draw entities", debug_cfg.draw_weather);
+
+         GuiButton
          //------------------------------------------------------------------------------
          // GuiWindowBox((Rectangle){ 50, 200, 300, 200 }, "#198# PORTABLE WINDOW");
          DrawText(TextFormat("MODE: %s", (segments >= 4)? "MANUAL" : "AUTO"), 640, 280, 10, (segments >= 4)? MAROON : DARKGRAY);

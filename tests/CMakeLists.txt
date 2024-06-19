@@ -1,29 +1,27 @@
 find_package(Catch2 CONFIG REQUIRED)
 
-## speed up the compiletime process
+## Speed up the compile-time process
 add_library(catch_main STATIC catch_main.cpp)
-target_link_libraries(catch_main PRIVATE Catch2::Catch2)
+target_link_libraries(catch_main PUBLIC Catch2::Catch2 Catch2::Catch2WithMain)
 
 function(test filename)
-    project(test.${filename})
-    add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/${filename}.cpp)
+    set(target_name test.${filename})
+    add_executable(${target_name})
 
-    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+    target_sources(${target_name} PRIVATE ${filename}.cpp)
 
-    target_link_libraries(${PROJECT_NAME} PRIVATE catch_main)
-    ## TODO: why is this necessary?
-    target_link_libraries(${PROJECT_NAME} PRIVATE Catch2::Catch2)
+    target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../src/)
 
-    target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
+    target_link_libraries(${target_name} PRIVATE catch_main)
 
     add_test(
-            NAME ${PROJECT_NAME}
-            COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}"
-            WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+            NAME ${target_name}
+            COMMAND $<TARGET_FILE:${target_name}>
+            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endfunction()
 
-## unit tests via catch (alphabetical order)
+## Unit tests via catch in alphabetical order
 ##
+test(player)
 test(point)
 test(rect)
-test(player)

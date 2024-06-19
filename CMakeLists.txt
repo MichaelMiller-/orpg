@@ -1,9 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.20)
 project(orpg
         VERSION 0.0.1
-        DESCRIPTION "Multiplayer RPG"
-        )
-
+        DESCRIPTION "Multiplayer RPG")
 
 # add_subdirectory(interface2sec21)
 # add_subdirectory(interface2raylib)
@@ -12,25 +10,29 @@ include(GNUInstallDirs)
 include(FetchContent)
 include(CMakePrintHelpers)
 
+set(CMAKE_CXX_STANDARD 20)
+# set(CMAKE_CXX_STANDARD_REQUIRED On)
+# set(CMAKE_CXX_EXTENSIONS Off)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-configure_file(${PROJECT_SOURCE_DIR}/src/config.h.in ${PROJECT_BINARY_DIR}/config.h)
-configure_file(${PROJECT_SOURCE_DIR}/data/test.lua ${PROJECT_BINARY_DIR}/test.lua COPYONLY)
-configure_file(${PROJECT_SOURCE_DIR}/data/preferences.json ${PROJECT_BINARY_DIR}/preferences.json COPYONLY)
+configure_file(src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(data/preferences.json ${CMAKE_CURRENT_BINARY_DIR}/preferences.json COPYONLY)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(orpg)
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-target_include_directories(${PROJECT_NAME}
+target_sources(orpg PRIVATE  src/main.cpp)
+
+target_include_directories(orpg
         PRIVATE src
-        PRIVATE ${PROJECT_BINARY_DIR})
+        PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if (EMSCRIPTEN)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
 
-  target_compile_definitions(${PROJECT_NAME} PRIVATE ORPG_WEB_BUILD)
+  target_compile_definitions(orpg PRIVATE ORPG_WEB_BUILD)
 
   FetchContent_Declare(
           raylib
@@ -50,26 +52,23 @@ if (EMSCRIPTEN)
     set(CMAKE_BUILD_TYPE Release)
     FetchContent_Populate(raylib)
 
-    cmake_print_variables(raylib_SOURCE_DIR)
-    cmake_print_variables(raylib_BINARY_DIR)
-
     add_subdirectory(${raylib_SOURCE_DIR} ${raylib_BINARY_DIR})
     list(APPEND CMAKE_MODULE_PATH ${raylib_SOURCE_DIR}/cmake)
-    list(APPEND CMAKE_PREFIX_PATH ${raylib_SOURCE_DIR}/cmake)
+    # list(APPEND CMAKE_PREFIX_PATH ${raylib_SOURCE_DIR}/cmake)
   endif()
 
   # find_package(GLEW CONFIG REQUIRED)
   # target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
 
 else()
-  target_compile_definitions(${PROJECT_NAME} PRIVATE ORPG_DESKTOP_BUILD)
+  target_compile_definitions(orpg PRIVATE ORPG_DESKTOP_BUILD)
 
   find_package(raylib CONFIG REQUIRED)
-  find_package(sol2 CONFIG REQUIRED)
-  find_package(Lua REQUIRED)
+  # find_package(sol2 CONFIG REQUIRED)
+  # find_package(Lua REQUIRED)
 
-  target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+  # target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
+  # target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
 endif ()
 
 ## raygui
@@ -80,19 +79,22 @@ FetchContent_Declare(
 )
 if (NOT raygui_POPULATED)
   FetchContent_Populate(raygui)
-  target_include_directories(${PROJECT_NAME} PRIVATE ${raygui_SOURCE_DIR}/src)
+  target_include_directories(orpg PRIVATE ${raygui_SOURCE_DIR}/src)
 endif()
 
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(EnTT 3.10 REQUIRED)
+find_package(raylib REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
-target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
+# find_path(RAYGUI_INCLUDE_DIRS "raygui.h")
+# target_include_directories(orpg PRIVATE ${RAYGUI_INCLUDE_DIRS})
+
+target_link_libraries(orpg PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(orpg PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 # target_link_libraries(${PROJECT_NAME} PRIVATE interface2raylib)
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
-# target_link_libraries(${PROJECT_NAME} PRIVATE interface2sec21)
-target_link_libraries(${PROJECT_NAME} PRIVATE EnTT::EnTT)
+target_link_libraries(orpg PRIVATE raylib)
+target_link_libraries(orpg PRIVATE EnTT::EnTT)
 
 
 include(CTest)
