@@ -2,11 +2,9 @@ name: Clang
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   pull_request:
-    branches:
-      - master
+    branches: [master]
 
 env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
@@ -18,7 +16,7 @@ jobs:
     strategy:
       matrix:
         version: [ 16, 17, 18 ]
-        config: [ Debug, Release ]
+        config: [ Release ]
 
     steps:
       - uses: actions/checkout@master

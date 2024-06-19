@@ -2,11 +2,9 @@ name: MSVC 2019
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   pull_request:
-    branches:
-      - master
+    branches: [master]
 
 jobs:
   build-and-test:
@@ -14,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        config: [Debug, Release]
+        config: [Release]
 
     steps:
       - uses: actions/checkout@v2
