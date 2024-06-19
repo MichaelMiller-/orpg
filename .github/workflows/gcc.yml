@@ -2,11 +2,9 @@ name: GCC
 
 on:
   push:
-    branches:
-      - master
+    branches: [ $default-branch ]
   pull_request:
-    branches:
-      - master
+    branches: [ $default-branch ]
 
 env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
