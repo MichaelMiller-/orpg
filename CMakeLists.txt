@@ -65,11 +65,6 @@ else()
   target_compile_definitions(orpg PRIVATE ORPG_DESKTOP_BUILD)
 
   find_package(raylib CONFIG REQUIRED)
-  # find_package(sol2 CONFIG REQUIRED)
-  # find_package(Lua REQUIRED)
-
-  # target_link_libraries(${PROJECT_NAME} PRIVATE sol2::sol2)
-  # target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
 endif ()
 
 ## raygui
@@ -86,16 +81,17 @@ endif()
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(EnTT 3.10 REQUIRED)
-find_package(raylib REQUIRED)
+find_package(raylib CONFIG REQUIRED)
+find_package(sec21 CONFIG REQUIRED)
 
 # find_path(RAYGUI_INCLUDE_DIRS "raygui.h")
 # target_include_directories(orpg PRIVATE ${RAYGUI_INCLUDE_DIRS})
 
 target_link_libraries(orpg PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 target_link_libraries(orpg PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
-# target_link_libraries(${PROJECT_NAME} PRIVATE interface2raylib)
 target_link_libraries(orpg PRIVATE raylib)
 target_link_libraries(orpg PRIVATE EnTT::EnTT)
+target_link_libraries(orpg PRIVATE sec21::sec21)
 
 
 include(CTest)

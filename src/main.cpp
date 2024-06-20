@@ -38,7 +38,7 @@
 
 #include <entt/entt.hpp>
 
-// #include <nlohmann/json.hpp>
+#include <sec21/expects.h>
 
 #ifdef ORPG_DESKTOP_BUILD
 
@@ -120,13 +120,13 @@ namespace orpg
 
       auto make_camera()
       {
-         auto entity = registry.create();
+         auto const entity = registry.create();
          registry.emplace<rpc_2d_camera>(entity, cfg.window / SQUARE_SIZE, point{});
       }
 
       void make_blocked_tile(int x, int y)
       {
-         auto entity = registry.create();
+         auto const entity = registry.create();
          registry.emplace<drawable>(entity, BLACK);
          registry.emplace<blocked>(entity);
          registry.emplace<position>(entity, x, y);
@@ -136,7 +136,7 @@ namespace orpg
 
       auto make_npc(int x, int y)
       {
-         auto entity = registry.create();
+         auto const entity = registry.create();
          registry.emplace<drawable>(entity, GRAY);
          registry.emplace<position>(entity, x, y);
          registry.emplace<active>(entity);
@@ -149,7 +149,7 @@ namespace orpg
       template <typename Map>
       auto make_portal(int x, int y, Map map, point p)
       {
-         auto entity = registry.create();
+         auto const entity = registry.create();
          registry.emplace<drawable>(entity, PINK);
          registry.emplace<position>(entity, x, y);
          registry.emplace<portal>(entity, std::move(map), std::move(p));
@@ -160,7 +160,7 @@ namespace orpg
 
       auto make_player(point pos)
       {
-         auto entity = registry.create();
+         auto const entity = registry.create();
          registry.emplace<drawable>(entity, SKYBLUE);
          registry.emplace<position>(entity, pos.x, pos.y);
          registry.emplace<velocity>(entity, 0, 0);
@@ -174,15 +174,15 @@ namespace orpg
       [[nodiscard]] auto single_entity() const
       {
          auto view_all = registry.view<T>();
-         // expects([=](){ return view_all.begin() != view_all.end(); }, "Expects at least one item");
+         sec21::expects([=](){ return view_all.begin() != view_all.end(); }, "Expects at least one item");
          return std::get<T&>(view_all.get(*view_all.begin()));
       }
 
       template <typename T>
-      [[nodiscard]] auto& single_entity()
+      [[nodiscard]] auto& single_entity() 
       {
          auto view_all = registry.view<T>();
-         // expects([=](){ return view_all.begin() != view_all.end(); }, "Expects at least one item");
+         sec21::expects([=]() { return view_all.begin() != view_all.end(); }, "Expects at least one item");
          return std::get<T&>(view_all.get(*view_all.begin()));
       }
 
@@ -246,7 +246,6 @@ namespace orpg
 
       void update()
       {
-         // input
          update_input();
          // dispatcher.update(); // emits all the events queued so far at once
          // *** fixed update
@@ -274,7 +273,7 @@ namespace orpg
       template <typename Layer>
       void clear() noexcept
       {
-         const auto entities = registry.view<Layer>();
+         auto entities = registry.view<Layer>();
          registry.destroy(entities.begin(), entities.end());
       }
 
@@ -329,10 +328,10 @@ namespace orpg
       void collision_detection() noexcept
       {
          registry.view<player, position, velocity>().each([this](auto, position const& pos, velocity& vel) {
-            const auto map_size = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
-            const auto inside_map = map_size.is_inside(pos + vel);
-            const auto all_entities = registry.view<blocked, position>(); //! \todo: std::views::filter(is_in_viewport);
-            const auto entity_collision =
+            auto const map_size = rect{{0, 0}, std::visit([](auto map) { return extent(map); }, maps)};
+            auto const inside_map = map_size.is_inside(pos + vel);
+            auto const all_entities = registry.view<blocked, position>(); //! \todo: std::views::filter(is_in_viewport);
+            auto const entity_collision =
                std::count_if(all_entities.begin(), all_entities.end(),
                              [this, p = pos + vel](auto e) { return registry.get<position>(e) == p; });
 
@@ -341,7 +340,7 @@ namespace orpg
          });
       }
 
-      void player_movement(const float) noexcept // dt
+      void player_movement(float) noexcept // dt
       {
          registry.view<player, position, velocity>().each([](auto, position& pos, velocity const& vel) {
             pos.x += vel.dx;
@@ -413,7 +412,7 @@ namespace orpg
                 IsGamepadButtonReleased(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
 
                registry.view<player, position>().each([this](auto, position const& player_pos) {
-                  const auto portals =
+                  auto portals =
                      registry.view<position, portal>(); //! \todo: | ranges::view::filter(is_in_viewport);
 
                   portals.each([this, player_pos](auto, position const& pos, auto const& port) {
@@ -430,8 +429,8 @@ namespace orpg
 
       void draw_grid() const noexcept
       {
-         const auto half_offset = screen_offset / 2;
-         const auto ho =
+         auto const half_offset = screen_offset / 2;
+         auto const ho =
             Vector2{static_cast<decltype(Vector2::x)>(half_offset.x), static_cast<decltype(Vector2::y)>(half_offset.y)};
 
          for (auto i = 0; i < cfg.window.width() / SQUARE_SIZE + 1; ++i) {
@@ -447,8 +446,8 @@ namespace orpg
       template <typename Function>
       void draw_tile(int x, int y, Function f) const noexcept
       {
-         const auto cam = single_entity<rpc_2d_camera const>();
-         const auto dt = point{x, y} + cam.position;
+         auto const cam = single_entity<rpc_2d_camera const>();
+         auto const dt = point{x, y} + cam.position;
          DrawRectangleV(
             Vector2{static_cast<decltype(Vector2::x)>((x + map_offset.x) * SQUARE_SIZE),
                     static_cast<decltype(Vector2::y)>((y + map_offset.y) * SQUARE_SIZE)},
@@ -459,7 +458,7 @@ namespace orpg
       template <typename Map, typename Function>
       void draw_tiles(Function f) const noexcept
       {
-         const auto cam = single_entity<rpc_2d_camera const>();
+         auto const cam = single_entity<rpc_2d_camera const>();
 
          for (auto y = 0; y < std::min(cam.viewport.height(), Map::rows_v); ++y) {
             for (auto x = 0; x < std::min(cam.viewport.width(), Map::cols_v); ++x) {
@@ -471,9 +470,8 @@ namespace orpg
       template <typename Map>
       void draw_map(Map map) const noexcept
       {
-         const auto func2 = [&map](auto row, auto col) {
-            const auto index = map.tiles[row][col];
-            switch (index) {
+         auto func2 = [&map](auto row, auto col) {
+            switch (auto index = map.tiles[row][col]) {
             case 0:
                return Color{0, 70, 0, 255};
             case 1:
@@ -612,7 +610,7 @@ namespace orpg
 
       void draw_game_debug_information() const
       {
-         const auto left = cfg.window.width() - 150;
+         auto left = cfg.window.width() - 150;
 
          registry.view<player, position>().each([this, left](auto, position const& pos) {
             DrawText(fmt::format("player pos: ({},{})", pos.x, pos.y).c_str(), left, cfg.window.height() - 40, 10,
@@ -663,7 +661,7 @@ namespace orpg
          //! \todo sec21::for_each_indexed()
          for (decltype(gamepads.size()) i = 0; i < gamepads.size(); ++i) {
             it_y += 20;
-            const auto e = gamepads[i];
+            auto const& e = gamepads[i];
             DrawText(fmt::format("GP: {}", e.name).c_str(), 10, it_y, 10, BLACK);
             it_y += 20;
             DrawText(fmt::format("Detected axis count: {}", e.axis_movement.size()).c_str(), 10, it_y, 10, MAROON);
@@ -675,7 +673,7 @@ namespace orpg
          }
       }
 
-      void draw() noexcept
+      void draw() const noexcept
       {
          BeginDrawing();
          ClearBackground(RAYWHITE);
