@@ -2,8 +2,8 @@
   "fullscreen": false,
   "window": {
     "extent": {
-      "height": 480,
-      "width": 640
+      "height": 768,
+      "width": 1024
     },
     "top_left_position": {
       "x": 0,
