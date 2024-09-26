@@ -14,8 +14,11 @@ set(CMAKE_CXX_STANDARD 20)
 # set(CMAKE_CXX_STANDARD_REQUIRED On)
 # set(CMAKE_CXX_EXTENSIONS Off)
 
-configure_file(src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-configure_file(data/preferences.json ${CMAKE_CURRENT_BINARY_DIR}/preferences.json COPYONLY)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}) # ensure that the directory exists
+
+configure_file(src/config.h.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config.h)
+configure_file(data/preferences.json ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/preferences.json COPYONLY)
 
 add_executable(orpg)
 enable_warnings(orpg)
@@ -24,7 +27,7 @@ target_sources(orpg PRIVATE src/main.cpp)
 
 target_include_directories(orpg
         PRIVATE src
-        PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+        PRIVATE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Default is: Desktop build
 target_compile_definitions(orpg PRIVATE ORPG_DESKTOP_BUILD)
