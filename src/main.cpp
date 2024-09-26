@@ -21,11 +21,7 @@
 #define RAYGUI_IMPLEMENTATION
 // #include <raygui.h>
 
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
-#if defined(PLATFORM_WEB)
+#ifdef ORPG_WEB_BUILD
 #include <emscripten/emscripten.h>
 #endif
 
@@ -704,13 +700,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
       spdlog::info("Starting application: {} {}.{}", EXECUTABLE_NAME, VERSION_MAJOR, VERSION_MINOR);
       spdlog::debug("enTT version: {}.{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR);
 
-      const auto settings =
-         orpg::read_from_json<orpg::settings>(BINARY_DIRECTORY / std::filesystem::path{"preferences.json"});
-
-      app.reset(new orpg::application{settings});
+#ifdef ORPG_WEB_BUILD
+      auto preferences = orpg::settings{};
+#else
+      auto preferences = orpg::read_from_json<orpg::settings>(BINARY_DIRECTORY / std::filesystem::path{"preferences.json"});
+#endif
+      app.reset(new orpg::application{preferences});
       app->init();
 
-#if defined(PLATFORM_WEB)
+#ifdef ORPG_WEB_BUILD
       emscripten_set_main_loop([]() { app->update(); }, 60, 1);
 #else
       SetTargetFPS(60);
@@ -723,7 +721,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
       CloseWindow();
 
    } catch (std::exception& ex) {
-      spdlog::critical("Exception: {}", ex.what());
+      spdlog::critical("{}", ex.what());
       return -1;
    }
    return 0;

@@ -1,11 +1,6 @@
-
-[![GCC](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc.yml)  
-[![Clang](https://github.com/MichaelMiller-/orpg/actions/workflows/clang.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/clang.yml)  
-[![MSVC 2019](https://github.com/MichaelMiller-/orpg/actions/workflows/msvc2019.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/msvc2019.yml)  
-
----------------------------------------
-
 # orpg
+
+[![GCC](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/gcc.yml) [![Clang](https://github.com/MichaelMiller-/orpg/actions/workflows/clang.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/clang.yml) [![MSVC 2019](https://github.com/MichaelMiller-/orpg/actions/workflows/msvc2019.yml/badge.svg)](https://github.com/MichaelMiller-/orpg/actions/workflows/msvc2019.yml)  
 
 **orpg** is a role-playing game.
 
