@@ -135,12 +135,14 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(EnTT 3.10 REQUIRED)
 find_package(sec21 CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 target_link_libraries(orpg PRIVATE raylib)
 target_link_libraries(orpg PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 target_link_libraries(orpg PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 target_link_libraries(orpg PRIVATE EnTT::EnTT)
 target_link_libraries(orpg PRIVATE sec21::sec21)
+target_link_libraries(orpg PRIVATE glfw)
 
 include(CTest)
 if (BUILD_TESTING) # option is created by CTest

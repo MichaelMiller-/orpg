@@ -33,11 +33,6 @@ jobs:
         git clone https://github.com/Microsoft/vcpkg.git 
         cd vcpkg
         ./bootstrap-vcpkg.sh
-        ./vcpkg install spdlog:wasm32-emscripten
-        ./vcpkg install nlohmann-json:wasm32-emscripten
-        ./vcpkg install entt:wasm32-emscripten
-        ./vcpkg install raylib:wasm32-emscripten
-        ./vcpkg install michaelmiller-sec21:wasm32-emscripten
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build

@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "catch2",
+    "raylib",
+    "glfw3",
+    "entt",
+    "michaelmiller-sec21"
+  ]
+}
