@@ -1,9 +1,8 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
-
 #include <nlohmann/json.hpp>
 
+#include <format>
 #include <fstream>
 
 namespace orpg
@@ -14,10 +13,10 @@ namespace orpg
       T result;
       try {
          std::ifstream ifs{filename};
-         const auto j = nlohmann::json::parse(ifs);
+         auto j = nlohmann::json::parse(ifs);
          result = j.get<T>();
       } catch (...) {
-         spdlog::warn("failed to open and parse: {} \n -> use default", filename.string());
+         std::puts(std::format("failed to open and parse: {} \n -> use default", filename.string()).c_str());
       }
       return result;
    }

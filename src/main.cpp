@@ -4,7 +4,7 @@
 #include "components/movement_speed.h"
 #include "components/npc.h"
 #include "components/player.h"
-#include "components/position.h"
+// #include "components/position.h"
 #include "components/triggerable.h"
 #include "components/velocity.h"
 #include "config.h"
@@ -18,17 +18,12 @@
 #include "tile_map.h"
 
 #include <raylib.h>
-#define RAYGUI_IMPLEMENTATION
-// #include <raygui.h>
 
 #ifdef ORPG_WEB_BUILD
 #include <emscripten/emscripten.h>
 #endif
 
-#include <spdlog/spdlog.h>
-
 #include <cstdarg>
-// #include <ranges>
 #include <format>
 #include <memory>
 #include <variant>
@@ -41,15 +36,18 @@
 
 #endif
 
-auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept { return Vector2{lhs.x + rhs.x, lhs.y + rhs.y}; }
+constexpr auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept
+{
+   return Vector2{lhs.x + rhs.x, lhs.y + rhs.y};
+}
 
-auto operator+(Vector2 const& lhs, orpg::point const& rhs) noexcept
+constexpr auto operator+(Vector2 const& lhs, orpg::point const& rhs) noexcept
 {
    return Vector2{lhs.x + static_cast<decltype(Vector2::x)>(rhs.x), lhs.y + static_cast<decltype(Vector2::y)>(rhs.y)};
 }
 
 template <typename T>
-auto operator/(Vector2 const& lhs, T const& rhs)
+constexpr auto operator/(Vector2 const& lhs, T const& rhs)
 {
    // \todo if (rhs == 0)
    return Vector2{lhs.x / rhs, lhs.y / rhs};
@@ -190,11 +188,12 @@ namespace orpg
             // boilerplate to copy the arguments into a buffer
             char buffer[512] = {0};
             vsnprintf(buffer, 512, text, args);
-
+            std::puts(buffer);
+#if 0
             switch (log_level) {
             case TraceLogLevel::LOG_DEBUG:
             case TraceLogLevel::LOG_TRACE:
-               spdlog::debug("{}", buffer);
+               std::puts(buffer);
                break;
             case TraceLogLevel::LOG_INFO:
                spdlog::info("{}", buffer);
@@ -210,6 +209,7 @@ namespace orpg
                spdlog::info("+++ level {} = {}", log_level, buffer);
                break;
             }
+#endif
          });
          InitWindow(cfg.window.width(), cfg.window.height(), cfg.window_title.c_str());
       }
@@ -218,21 +218,21 @@ namespace orpg
 
       void init()
       {
-         spdlog::info("Initialize application ...");
+         std::puts("Initialize application ...");
 
          frame_counter = 0;
          pause = false;
 
          screen_offset.x = cfg.window.width() % SQUARE_SIZE;
          screen_offset.y = cfg.window.height() % SQUARE_SIZE;
-         spdlog::debug("screen offset: ({},{})", screen_offset.x, screen_offset.y);
+         std::puts(std::format("screen offset: ({},{})", screen_offset.x, screen_offset.y).c_str());
 
          make_camera();
          make_player({2, 2});
 
          std::visit([this](auto map) { return load_map(map); }, maps);
 
-         spdlog::info("connect signals");
+         std::puts("connect signals");
          {
             // store signal in the registry
             auto& signal = registry.ctx().emplace<trigger_portal_t>();
@@ -276,7 +276,7 @@ namespace orpg
 
       void handle_portal(portal const& p) noexcept
       {
-         spdlog::debug("portal to '{}' triggered ... ", to_string(p.target));
+         std::puts(std::format("portal to '{}' triggered ... ", to_string(p.target)).c_str());
          // select target (new) map
          std::visit(
             [this, &p](auto e) {
@@ -377,13 +377,14 @@ namespace orpg
       void update_input() noexcept
       {
          if (IsKeyPressed(KEY_F12)) {
-            spdlog::info("Take screenshot: {}", "screenshot.png");
+            std::puts("Save screenshot into file: screenshot.png");
             TakeScreenshot("screenshot");
             // dispatcher.enqueue<event::take_screenshot>();
          }
          if (IsKeyPressed(KEY_F10)) {
             cfg.fullscreen = !cfg.fullscreen;
-            spdlog::info("Toggle fullscreen: {}", cfg.fullscreen);
+         std:
+            puts(std::format("Toggle fullscreen: {}", cfg.fullscreen).c_str());
             //! \todo
             // dispatcher.enqueue<event::game_pause>();
          }
@@ -694,11 +695,8 @@ std::unique_ptr<orpg::application> app{nullptr};
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
    try {
-      // #ifndef NDEBUG
-      spdlog::set_level(spdlog::level::debug);
-      // #endif
-      spdlog::info("Starting application: {} {}.{}", EXECUTABLE_NAME, VERSION_MAJOR, VERSION_MINOR);
-      spdlog::debug("enTT version: {}.{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR);
+      std::puts(std::format("Starting application: {} {}.{}", EXECUTABLE_NAME, VERSION_MAJOR, VERSION_MINOR).c_str());
+      std::puts(std::format("enTT version: {}.{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR).c_str());
 
 #ifdef ORPG_WEB_BUILD
       auto preferences = orpg::settings{};
@@ -722,7 +720,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
       CloseWindow();
 
    } catch (std::exception& ex) {
-      spdlog::critical("{}", ex.what());
+      std::puts(ex.what());
       return -1;
    }
    return 0;
