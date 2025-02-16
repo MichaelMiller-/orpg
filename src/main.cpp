@@ -29,6 +29,7 @@
 
 #include <cstdarg>
 // #include <ranges>
+#include <format>
 #include <memory>
 #include <variant>
 
@@ -170,12 +171,12 @@ namespace orpg
       [[nodiscard]] auto single_entity() const
       {
          auto view_all = registry.view<T>();
-         sec21::expects([=](){ return view_all.begin() != view_all.end(); }, "Expects at least one item");
+         sec21::expects([=]() { return view_all.begin() != view_all.end(); }, "Expects at least one item");
          return std::get<T&>(view_all.get(*view_all.begin()));
       }
 
       template <typename T>
-      [[nodiscard]] auto& single_entity() 
+      [[nodiscard]] auto& single_entity()
       {
          auto view_all = registry.view<T>();
          sec21::expects([=]() { return view_all.begin() != view_all.end(); }, "Expects at least one item");
@@ -408,8 +409,7 @@ namespace orpg
                 IsGamepadButtonReleased(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
 
                registry.view<player, position>().each([this](auto, position const& player_pos) {
-                  auto portals =
-                     registry.view<position, portal>(); //! \todo: | ranges::view::filter(is_in_viewport);
+                  auto portals = registry.view<position, portal>(); //! \todo: | ranges::view::filter(is_in_viewport);
 
                   portals.each([this, player_pos](auto, position const& pos, auto const& port) {
                      if (player_pos == pos) {
@@ -609,11 +609,11 @@ namespace orpg
          auto left = cfg.window.width() - 150;
 
          registry.view<player, position>().each([this, left](auto, position const& pos) {
-            DrawText(fmt::format("player pos: ({},{})", pos.x, pos.y).c_str(), left, cfg.window.height() - 40, 10,
+            DrawText(std::format("player pos: ({},{})", pos.x, pos.y).c_str(), left, cfg.window.height() - 40, 10,
                      MAROON);
          });
          registry.view<rpc_2d_camera const>().each([this, left](auto, auto const& cam) {
-            DrawText(fmt::format("Camera pos: ({},{})", cam.position.x, cam.position.y).c_str(), left,
+            DrawText(std::format("Camera pos: ({},{})", cam.position.x, cam.position.y).c_str(), left,
                      cfg.window.height() - 20, 10, MAROON);
          });
       }
@@ -649,7 +649,7 @@ namespace orpg
 
          int it_y = 10;
          if (GetGamepadButtonPressed() != -1) {
-            DrawText(fmt::format("Detected button: {}", GetGamepadButtonPressed()).c_str(), 10, it_y, 10, RED);
+            DrawText(std::format("Detected button: {}", GetGamepadButtonPressed()).c_str(), 10, it_y, 10, RED);
          } else {
             DrawText("Detected button: None", 10, it_y, 10, GRAY);
          }
@@ -658,9 +658,9 @@ namespace orpg
          for (decltype(gamepads.size()) i = 0; i < gamepads.size(); ++i) {
             it_y += 20;
             auto const& e = gamepads[i];
-            DrawText(fmt::format("GP: {}", e.name).c_str(), 10, it_y, 10, BLACK);
+            DrawText(std::format("GP: {}", e.name).c_str(), 10, it_y, 10, BLACK);
             it_y += 20;
-            DrawText(fmt::format("Detected axis count: {}", e.axis_movement.size()).c_str(), 10, it_y, 10, MAROON);
+            DrawText(std::format("Detected axis count: {}", e.axis_movement.size()).c_str(), 10, it_y, 10, MAROON);
             it_y += 20;
             for (decltype(e.axis_movement.size()) k = 0; k < e.axis_movement.size(); ++k) {
                DrawText(TextFormat("AXIS %i: %.02f", i, e.axis_movement[k]), 20, it_y, 10, DARKGRAY);
@@ -703,7 +703,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 #ifdef ORPG_WEB_BUILD
       auto preferences = orpg::settings{};
 #else
-      auto preferences = orpg::read_from_json<orpg::settings>(BINARY_DIRECTORY / std::filesystem::path{"preferences.json"});
+      auto preferences =
+         orpg::read_from_json<orpg::settings>(BINARY_DIRECTORY / std::filesystem::path{"preferences.json"});
 #endif
       app.reset(new orpg::application{preferences});
       app->init();
