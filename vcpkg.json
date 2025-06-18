@@ -1,9 +1,15 @@
 {
   "dependencies": [
-    "catch2",
     "raylib",
     "glfw3",
-    "entt",
-    "michaelmiller-sec21"
-  ]
+    "entt"
+  ],
+  "features": {
+    "tests": {
+      "description": "Development tests",
+      "dependencies": [
+        "catch2"
+      ]
+    }
+  }
 }
