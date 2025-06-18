@@ -2,9 +2,7 @@ name: Clang
 
 on:
   push:
-    branches: [master]
   pull_request:
-    branches: [master]
 
 env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
