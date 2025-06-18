@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>orpg</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <script src="@ORPG_BINARY_NAME@.js"></script>
+  <script>
+    const canvas = document.createElement('canvas');
+    canvas.id = 'canvas';
+    document.getElementById('container').appendChild(canvas);
+
+    @ORPG_MODULE_NAME@({
+      canvas: canvas
+    }).then(function(Module) {
+        // get function pointer
+        const setWindowSize = Module.cwrap("SetWindowSize", null, ["number", "number"]);
+
+        function resizeCanvas() {
+            const canvas = document.getElementById('canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            setWindowSize(canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // call once at startup
+        resizeCanvas();
+    });
+  </script>
+</body>
+</html>

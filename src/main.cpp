@@ -4,16 +4,14 @@
 #include "components/movement_speed.h"
 #include "components/npc.h"
 #include "components/player.h"
-// #include "components/position.h"
 #include "components/triggerable.h"
 #include "components/velocity.h"
 #include "config.h"
+#include "configuration.h"
 #include "data.h"
 #include "entities.h"
-#include "file_io.h"
 #include "point.h"
 #include "rect.h"
-#include "settings.h"
 #include "tags.h"
 #include "tile_map.h"
 
@@ -25,16 +23,11 @@
 
 #include <cstdarg>
 #include <format>
-#include <memory>
 #include <variant>
 
 #include <entt/entt.hpp>
 
 #include <sec21/expects.h>
-
-#ifdef ORPG_DESKTOP_BUILD
-
-#endif
 
 constexpr auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept
 {
@@ -99,7 +92,7 @@ namespace orpg
       };
       // window
       debug_settings debug_cfg{};
-      settings cfg{};
+      configuration_t config{};
 
       point screen_offset{0, 0};
       point map_offset{0, 0};
@@ -116,7 +109,7 @@ namespace orpg
       auto make_camera()
       {
          auto const entity = registry.create();
-         registry.emplace<rpc_2d_camera>(entity, cfg.window / SQUARE_SIZE, point{});
+         registry.emplace<rpc_2d_camera>(entity, get_window_rect() / SQUARE_SIZE, point{});
       }
 
       void make_blocked_tile(int x, int y)
@@ -182,7 +175,7 @@ namespace orpg
       }
 
    public:
-      explicit application(settings defaults) : cfg{std::move(defaults)}
+      application()
       {
          SetTraceLogCallback([](auto log_level, auto text, auto args) {
             // boilerplate to copy the arguments into a buffer
@@ -211,7 +204,7 @@ namespace orpg
             }
 #endif
          });
-         InitWindow(cfg.window.width(), cfg.window.height(), cfg.window_title.c_str());
+         InitWindow(1024, 768, "orpg");
       }
 
       ~application() = default;
@@ -223,8 +216,8 @@ namespace orpg
          frame_counter = 0;
          pause = false;
 
-         screen_offset.x = cfg.window.width() % SQUARE_SIZE;
-         screen_offset.y = cfg.window.height() % SQUARE_SIZE;
+         screen_offset.x = GetScreenWidth() % SQUARE_SIZE;
+         screen_offset.y = GetScreenHeight() % SQUARE_SIZE;
          std::puts(std::format("screen offset: ({},{})", screen_offset.x, screen_offset.y).c_str());
 
          make_camera();
@@ -382,11 +375,7 @@ namespace orpg
             // dispatcher.enqueue<event::take_screenshot>();
          }
          if (IsKeyPressed(KEY_F10)) {
-            cfg.fullscreen = !cfg.fullscreen;
-         std:
-            puts(std::format("Toggle fullscreen: {}", cfg.fullscreen).c_str());
-            //! \todo
-            // dispatcher.enqueue<event::game_pause>();
+            ToggleFullscreen();
          }
          if (IsKeyPressed('P')) {
             pause = !pause;
@@ -430,13 +419,13 @@ namespace orpg
          auto const ho =
             Vector2{static_cast<decltype(Vector2::x)>(half_offset.x), static_cast<decltype(Vector2::y)>(half_offset.y)};
 
-         for (auto i = 0; i < cfg.window.width() / SQUARE_SIZE + 1; ++i) {
+         for (auto i = 0; i < GetScreenWidth() / SQUARE_SIZE + 1; ++i) {
             DrawLineV({SQUARE_SIZE * static_cast<float>(i) + ho.x, ho.y},
-                      {SQUARE_SIZE * static_cast<float>(i) + ho.x, cfg.window.height() - ho.y}, LIGHTGRAY);
+                      {SQUARE_SIZE * static_cast<float>(i) + ho.x, GetScreenHeight() - ho.y}, LIGHTGRAY);
          }
-         for (auto i = 0; i < cfg.window.height() / SQUARE_SIZE + 1; i++) {
+         for (auto i = 0; i < GetScreenHeight() / SQUARE_SIZE + 1; i++) {
             DrawLineV({ho.x, SQUARE_SIZE * static_cast<float>(i) + ho.y},
-                      {cfg.window.width() - ho.x, SQUARE_SIZE * static_cast<float>(i) + ho.y}, LIGHTGRAY);
+                      {GetScreenWidth() - ho.x, SQUARE_SIZE * static_cast<float>(i) + ho.y}, LIGHTGRAY);
          }
       }
 
@@ -516,15 +505,18 @@ namespace orpg
       }
       void draw_weather_layer() const noexcept {}
 
-      [[nodiscard]] constexpr auto half_window_width() const noexcept { return cfg.window.width() / 2; }
+      [[nodiscard]] auto get_window_rect() const -> rect
+      {
+         return rect{.top_left_position = {.x = 0, .y = 0},
+                     .extent = {.width = static_cast<extents::value_t>(GetScreenWidth()),
+                                .height = static_cast<extents::value_t>(GetScreenHeight())}};
+      }
 
-      [[nodiscard]] constexpr auto half_window_height() const noexcept { return cfg.window.height() / 2; }
-
-      void draw_pause_overlay() const noexcept
+      void draw_pause_overlay() const
       {
          if (pause) {
-            DrawText("GAME PAUSED", half_window_width() - MeasureText("GAME PAUSED", 40) / 2, half_window_height() - 40,
-                     40, GRAY);
+            auto const rc = get_window_rect() / 2;
+            DrawText("GAME PAUSED", rc.width() - MeasureText("GAME PAUSED", 40) / 2, rc.height() - 40, 40, GRAY);
          }
       }
 
@@ -579,43 +571,17 @@ namespace orpg
          }
       };
 
-      void draw_gui() const noexcept
-      {
-#if 0
-         button b1{{400, 40, 105, 20}, "WTF WTF WTF", []() { spdlog::info("Button clicked"); }};
-#endif
-#if 0
-         int width, height, roundness, lineThick, segments;
-         // Draw GUI controls
-         //------------------------------------------------------------------------------
-         width = (int)GuiSliderBar((Rectangle){ 640, 40, 105, 20 }, "Width", NULL, (float)width, 0, (float)GetScreenWidth() - 300);
-         height = (int)GuiSliderBar((Rectangle){ 640, 70, 105, 20 }, "Height", NULL, (float)height, 0, (float)GetScreenHeight() - 50);
-         roundness = GuiSliderBar((Rectangle){ 640, 140, 105, 20 }, "Roundness", NULL, roundness, 0.0f, 1.0f);
-         lineThick = (int)GuiSliderBar((Rectangle){ 640, 170, 105, 20 }, "Thickness", NULL, (float)lineThick, 0, 20);
-         segments = (int)GuiSliderBar((Rectangle){ 640, 240, 105, 20}, "Segments", NULL, (float)segments, 0, 60);
-         debug_cfg.draw_ground = GuiCheckBox((Rectangle){ 640, 320, 20, 20 }, "draw ground", debug_cfg.draw_ground);
-         debug_cfg.draw_entities = GuiCheckBox((Rectangle){ 640, 350, 20, 20 }, "draw entities", debug_cfg.draw_entities);
-         debug_cfg.draw_overlays = GuiCheckBox((Rectangle){ 640, 380, 20, 20 }, "draw entities", debug_cfg.draw_overlays);
-         debug_cfg.draw_weather = GuiCheckBox((Rectangle){ 640, 410, 20, 20 }, "draw entities", debug_cfg.draw_weather);
-
-         GuiButton
-         //------------------------------------------------------------------------------
-         // GuiWindowBox((Rectangle){ 50, 200, 300, 200 }, "#198# PORTABLE WINDOW");
-         DrawText(TextFormat("MODE: %s", (segments >= 4)? "MANUAL" : "AUTO"), 640, 280, 10, (segments >= 4)? MAROON : DARKGRAY);
-#endif
-      }
-
       void draw_game_debug_information() const
       {
-         auto left = cfg.window.width() - 150;
+         auto left = GetScreenWidth() - 150;
 
          registry.view<player, position>().each([this, left](auto, position const& pos) {
-            DrawText(std::format("player pos: ({},{})", pos.x, pos.y).c_str(), left, cfg.window.height() - 40, 10,
+            DrawText(std::format("player pos: ({},{})", pos.x, pos.y).c_str(), left, GetScreenHeight() - 40, 10,
                      MAROON);
          });
          registry.view<rpc_2d_camera const>().each([this, left](auto, auto const& cam) {
             DrawText(std::format("Camera pos: ({},{})", cam.position.x, cam.position.y).c_str(), left,
-                     cfg.window.height() - 20, 10, MAROON);
+                     GetScreenHeight() - 20, 10, MAROON);
          });
       }
 
@@ -655,16 +621,14 @@ namespace orpg
             DrawText("Detected button: None", 10, it_y, 10, GRAY);
          }
 
-         //! \todo sec21::for_each_indexed()
-         for (decltype(gamepads.size()) i = 0; i < gamepads.size(); ++i) {
+         for (auto&& [index, pad] : std::views::enumerate(gamepads)) {
             it_y += 20;
-            auto const& e = gamepads[i];
-            DrawText(std::format("GP: {}", e.name).c_str(), 10, it_y, 10, BLACK);
+            DrawText(std::format("GP: {}", pad.name).c_str(), 10, it_y, 10, BLACK);
             it_y += 20;
-            DrawText(std::format("Detected axis count: {}", e.axis_movement.size()).c_str(), 10, it_y, 10, MAROON);
+            DrawText(std::format("Detected axis count: {}", pad.axis_movement.size()).c_str(), 10, it_y, 10, MAROON);
             it_y += 20;
-            for (decltype(e.axis_movement.size()) k = 0; k < e.axis_movement.size(); ++k) {
-               DrawText(TextFormat("AXIS %i: %.02f", i, e.axis_movement[k]), 20, it_y, 10, DARKGRAY);
+            for (double k : pad.axis_movement) {
+               DrawText(TextFormat("AXIS %i: %.02f", index, k), 20, it_y, 10, DARKGRAY);
                it_y += 20;
             }
          }
@@ -681,7 +645,7 @@ namespace orpg
          draw_overlay_layer();
          draw_weather_layer();
          draw_pause_overlay();
-         draw_gui();
+         // draw_gui();
          draw_game_debug_information();
          draw_gamepad_debug_information();
 
@@ -695,16 +659,10 @@ std::unique_ptr<orpg::application> app{nullptr};
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
    try {
-      std::puts(std::format("Starting application: {} {}.{}", EXECUTABLE_NAME, VERSION_MAJOR, VERSION_MINOR).c_str());
+      std::puts(std::format("Starting application: {} {}.{}", ORPG_BINARY_NAME, VERSION_MAJOR, VERSION_MINOR).c_str());
       std::puts(std::format("enTT version: {}.{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR).c_str());
 
-#ifdef ORPG_WEB_BUILD
-      auto preferences = orpg::settings{};
-#else
-      auto preferences =
-         orpg::read_from_json<orpg::settings>(BINARY_DIRECTORY / std::filesystem::path{"preferences.json"});
-#endif
-      app.reset(new orpg::application{preferences});
+      app = std::make_unique<orpg::application>();
       app->init();
 
 #ifdef ORPG_WEB_BUILD

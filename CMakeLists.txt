@@ -10,20 +10,39 @@ include(FetchContent)
 include(CMakePrintHelpers)
 include(CompilerWarnings)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 # set(CMAKE_CXX_STANDARD_REQUIRED On)
 # set(CMAKE_CXX_EXTENSIONS Off)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}) # ensure that the directory exists
 
-configure_file(src/config.h.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config.h)
-configure_file(data/preferences.json ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/preferences.json COPYONLY)
-
 add_executable(orpg)
 enable_warnings(orpg)
 
-target_sources(orpg PRIVATE src/main.cpp)
+target_sources(orpg PRIVATE
+        src/main.cpp
+        src/configuration.h
+        src/data.h
+        src/entities.h
+        src/point.h
+        src/rect.h
+        src/tags.h
+        src/tile_map.h
+        src/components/collision.h
+        src/components/drawable.h
+        src/components/layers.h
+        src/components/movement_speed.h
+        src/components/npc.h
+        src/components/player.h
+        src/components/position.h
+        src/components/triggerable.h
+        src/components/velocity.h
+        src/entities/blocked.h
+        src/entities/chest.h
+        src/entities/none.h
+        src/entities/portal.h
+)
 
 target_include_directories(orpg
         PRIVATE src
@@ -32,11 +51,15 @@ target_include_directories(orpg
 # Default is: Desktop build
 target_compile_definitions(orpg PRIVATE ORPG_DESKTOP_BUILD)
 
+get_target_property(BINARY_NAME orpg NAME)
+configure_file(src/config.h.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config.h @ONLY)
+
 if (EMSCRIPTEN)
   message(STATUS "Emscripten build")
 
   target_compile_definitions(orpg PRIVATE ORPG_WEB_BUILD)
-  set(CMAKE_EXECUTABLE_SUFFIX ".html")
+
+  set(ORPG_MODULE_NAME OrpgModule)
 
   # -----------------------------------------------------------------------------
   # WebAssembly build options
@@ -44,10 +67,11 @@ if (EMSCRIPTEN)
   set(emscripten_link_options)
   set(emscripten_compile_options)
 
-  list(APPEND emscripten_link_options "-lembind")
+  # list(APPEND emscripten_link_options "-lembind")
   # list(APPEND emscripten_link_options "SHELL:-s MODULARIZE=1")
   # list(APPEND emscripten_link_options "SHELL:-s EXPORT_ES6=1")
-  list(APPEND emscripten_link_options "SHELL:-s SINGLE_FILE=1")
+  # list(APPEND emscripten_link_options "SHELL:-s SINGLE_FILE=1")
+  list(APPEND emscripten_link_options "SHELL:-s EXPORT_NAME=${ORPG_MODULE_NAME}")
   list(APPEND emscripten_link_options "SHELL:-s ENVIRONMENT=web")
   list(APPEND emscripten_link_options "SHELL:-s ASSERTIONS=1")
   list(APPEND emscripten_link_options "SHELL:-s USE_GLFW=3")
@@ -128,16 +152,17 @@ if (EMSCRIPTEN)
       ${emscripten_optimizations}
       ${emscripten_debug_options}
   )
+
+  configure_file(src/orpg.html.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/orpg.html @ONLY)
+
 endif ()
 
 find_package(raylib CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
 find_package(EnTT 3.10 REQUIRED)
 find_package(sec21 CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
 target_link_libraries(orpg PRIVATE raylib)
-target_link_libraries(orpg PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 target_link_libraries(orpg PRIVATE EnTT::EnTT)
 target_link_libraries(orpg PRIVATE sec21::sec21)
 target_link_libraries(orpg PRIVATE glfw)

@@ -2,15 +2,14 @@
 
 #include "point.h"
 
-// #ifndef NDEBUG
 #include <ostream>
-// #endif
 
 namespace orpg
 {
    struct extents
    {
       using value_t = std::uint16_t;
+
       value_t width{0};
       value_t height{0};
 
@@ -30,38 +29,20 @@ namespace orpg
 #endif
 
       //! \todo write test
-      template <typename T>
-      [[nodiscard]] constexpr auto operator/(T rhs) const noexcept
+      [[nodiscard]] constexpr auto operator/(std::integral auto rhs) const noexcept -> extents
       {
-         return extents{static_cast<value_t>(width / rhs), static_cast<value_t>(height / rhs)};
+         return {.width = static_cast<value_t>(width / rhs), .height = static_cast<value_t>(height / rhs)};
       }
 
       //! \todo write test
-      [[nodiscard]] constexpr auto center() const noexcept -> point { return {width / 2, height / 2}; }
+      [[nodiscard]] constexpr auto center() const noexcept -> point
+      {
+         return {.x = static_cast<point::value_t>(width / 2), .y = static_cast<point::value_t>(height / 2)};
+      }
 
-      // #ifndef NDEBUG
-      template <typename CharT, typename Traits>
-      friend auto& operator<<(std::basic_ostream<CharT, Traits>& os, extents const& obj)
+      friend auto operator<<(std::ostream& os, extents const& obj) -> decltype(auto)
       {
          return os << '[' << obj.width << 'x' << obj.height << ']';
       }
-      // #endif
    };
-} // namespace orpg
-
-#include <nlohmann/json.hpp>
-
-namespace orpg
-{
-   inline void to_json(nlohmann::json& j, extents const& obj)
-   {
-      j["width"] = obj.width;
-      j["height"] = obj.height;
-   }
-
-   inline void from_json(nlohmann::json const& j, extents& obj)
-   {
-      j.at("width").get_to(obj.width);
-      j.at("height").get_to(obj.height);
-   }
 } // namespace orpg
