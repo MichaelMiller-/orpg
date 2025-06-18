@@ -54,13 +54,13 @@ target_sources(orpg PRIVATE
 
 target_include_directories(orpg
         PRIVATE src
-        PRIVATE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+        PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Default is: Desktop build
 target_compile_definitions(orpg PRIVATE ORPG_DESKTOP_BUILD)
 
-get_target_property(BINARY_NAME orpg NAME)
-configure_file(src/config.h.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config.h @ONLY)
+get_target_property(ORPG_BINARY_NAME orpg NAME)
+configure_file(src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 
 if (EMSCRIPTEN)
   message(STATUS "Emscripten build")

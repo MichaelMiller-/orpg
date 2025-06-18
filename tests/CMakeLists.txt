@@ -10,10 +10,7 @@ function(test filename)
 
     target_link_libraries(${target_name} PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
 
-    add_test(
-            NAME ${target_name}
-            COMMAND $<TARGET_FILE:${target_name}>
-            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    add_test(NAME ${target_name} COMMAND $<TARGET_FILE:${target_name}>)
 endfunction()
 
 ## Unit tests via catch in alphabetical order
