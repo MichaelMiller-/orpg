@@ -21,7 +21,7 @@
 <body>
   <div id="container"></div>
 
-  <script src="@BINARY_NAME@.js"></script>
+  <script src="@ORPG_BINARY_NAME@.js"></script>
   <script>
     const canvas = document.createElement('canvas');
     canvas.id = 'canvas';

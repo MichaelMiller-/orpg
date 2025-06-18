@@ -659,7 +659,7 @@ std::unique_ptr<orpg::application> app{nullptr};
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
    try {
-      std::puts(std::format("Starting application: {} {}.{}", EXECUTABLE_NAME, VERSION_MAJOR, VERSION_MINOR).c_str());
+      std::puts(std::format("Starting application: {} {}.{}", ORPG_BINARY_NAME, VERSION_MAJOR, VERSION_MINOR).c_str());
       std::puts(std::format("enTT version: {}.{}", ENTT_VERSION_MAJOR, ENTT_VERSION_MINOR).c_str());
 
       app = std::make_unique<orpg::application>();
