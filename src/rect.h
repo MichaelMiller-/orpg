@@ -3,10 +3,8 @@
 #include "extents.h"
 #include "point.h"
 
-// #ifndef NDEBUG
 #include <ostream>
 #include <sstream>
-// #endif
 
 namespace orpg
 {
@@ -72,13 +70,10 @@ namespace orpg
          return rect{top_left_position, extent / rhs};
       }
 
-      // #ifndef NDEBUG
-      template <typename CharT, typename Traits>
-      friend auto& operator<<(std::basic_ostream<CharT, Traits>& os, rect const& obj)
+      friend auto operator<<(std::ostream& os, rect const& obj) -> decltype(auto)
       {
          return os << obj.top_left_position << ' ' << obj.extent;
       }
-      // #endif
    };
 
    [[nodiscard]] constexpr bool operator==(rect const& lhs, rect const& rhs) noexcept
@@ -86,30 +81,11 @@ namespace orpg
       return std::tie(lhs.top_left_position, lhs.extent) == std::tie(rhs.top_left_position, rhs.extent);
    }
 
-   // #ifndef NDEBUG
    [[nodiscard]] inline auto to_string(rect const& obj)
    {
       std::stringstream result{};
       result << obj;
       return result.str();
    }
-   // #endif
-} // namespace orpg
 
-
-#include <nlohmann/json.hpp>
-
-namespace orpg
-{
-   inline void to_json(nlohmann::json& j, rect const& obj)
-   {
-      j["top_left_position"] = obj.top_left_position;
-      j["extent"] = obj.extent;
-   }
-
-   inline void from_json(nlohmann::json const& j, rect& obj)
-   {
-      j.at("top_left_position").get_to(obj.top_left_position);
-      j.at("extent").get_to(obj.extent);
-   }
 } // namespace orpg

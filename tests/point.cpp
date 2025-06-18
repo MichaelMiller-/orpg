@@ -1,8 +1,8 @@
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "point.h"
 
-TEST_CASE("point", "[geometry]")
+TEST_CASE("point", "[orpg]")
 {
    using namespace orpg;
 

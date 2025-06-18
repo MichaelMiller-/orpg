@@ -1,9 +1,5 @@
 find_package(Catch2 CONFIG REQUIRED)
 
-## Speed up the compile-time process
-add_library(catch_main STATIC catch_main.cpp)
-target_link_libraries(catch_main PUBLIC Catch2::Catch2 Catch2::Catch2WithMain)
-
 function(test filename)
     set(target_name test.${filename})
     add_executable(${target_name})
@@ -12,7 +8,7 @@ function(test filename)
 
     target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../src/)
 
-    target_link_libraries(${target_name} PRIVATE catch_main)
+    target_link_libraries(${target_name} PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
 
     add_test(
             NAME ${target_name}
