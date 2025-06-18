@@ -84,7 +84,7 @@ if (EMSCRIPTEN)
   list(APPEND emscripten_link_options "SHELL:-s EXPORTED_FUNCTIONS=_main,_SetWindowSize")
   list(APPEND emscripten_link_options "SHELL:-s EXPORTED_RUNTIME_METHODS=ccall,cwrap")
 
-  target_compile_options(viewer PUBLIC "-O3")
+  target_compile_options(orpg PUBLIC "-O3")
 
   target_link_options(orpg PUBLIC ${emscripten_link_options} "-O3")
 
