@@ -27,8 +27,6 @@
 
 #include <entt/entt.hpp>
 
-#include <sec21/expects.h>
-
 constexpr auto operator+(Vector2 const& lhs, Vector2 const& rhs) noexcept
 {
    return Vector2{lhs.x + rhs.x, lhs.y + rhs.y};
@@ -158,19 +156,23 @@ namespace orpg
          registry.emplace<collision>(entity);
       }
 
+      //! \todo deducing this
       template <typename T>
-      [[nodiscard]] auto single_entity() const
+      [[nodiscard]] auto single_entity() const -> decltype(auto)
       {
          auto view_all = registry.view<T>();
-         sec21::expects([=]() { return view_all.begin() != view_all.end(); }, "Expects at least one item");
+         //! \todo
+         // sec21::expects([=]() { return view_all.begin() != view_all.end(); }, "Expects at least one item");
          return std::get<T&>(view_all.get(*view_all.begin()));
       }
 
+      //! \todo deducing this
       template <typename T>
-      [[nodiscard]] auto& single_entity()
+      [[nodiscard]] auto single_entity() -> decltype(auto)
       {
          auto view_all = registry.view<T>();
-         sec21::expects([=]() { return view_all.begin() != view_all.end(); }, "Expects at least one item");
+         //! \todo
+         // sec21::expects([=]() { return view_all.begin() != view_all.end(); }, "Expects at least one item");
          return std::get<T&>(view_all.get(*view_all.begin()));
       }
 
@@ -575,11 +577,11 @@ namespace orpg
       {
          auto left = GetScreenWidth() - 150;
 
-         registry.view<player, position>().each([this, left](auto, position const& pos) {
+         registry.view<player, position>().each([left](auto, position const& pos) {
             DrawText(std::format("player pos: ({},{})", pos.x, pos.y).c_str(), left, GetScreenHeight() - 40, 10,
                      MAROON);
          });
-         registry.view<rpc_2d_camera const>().each([this, left](auto, auto const& cam) {
+         registry.view<rpc_2d_camera const>().each([left](auto, auto const& cam) {
             DrawText(std::format("Camera pos: ({},{})", cam.position.x, cam.position.y).c_str(), left,
                      GetScreenHeight() - 20, 10, MAROON);
          });
@@ -621,6 +623,7 @@ namespace orpg
             DrawText("Detected button: None", 10, it_y, 10, GRAY);
          }
 
+#if __cpp_lib_ranges_enumerate >= 202302L
          for (auto&& [index, pad] : std::views::enumerate(gamepads)) {
             it_y += 20;
             DrawText(std::format("GP: {}", pad.name).c_str(), 10, it_y, 10, BLACK);
@@ -632,6 +635,20 @@ namespace orpg
                it_y += 20;
             }
          }
+#else
+         for (decltype(gamepads.size()) i = 0; i < gamepads.size(); ++i) {
+            it_y += 20;
+            auto const& e = gamepads[i];
+            DrawText(std::format("GP: {}", e.name).c_str(), 10, it_y, 10, BLACK);
+            it_y += 20;
+            DrawText(std::format("Detected axis count: {}", e.axis_movement.size()).c_str(), 10, it_y, 10, MAROON);
+            it_y += 20;
+            for (decltype(e.axis_movement.size()) k = 0; k < e.axis_movement.size(); ++k) {
+               DrawText(TextFormat("AXIS %i: %.02f", i, e.axis_movement[k]), 20, it_y, 10, DARKGRAY);
+               it_y += 20;
+            }
+         }
+#endif
       }
 
       void draw() const noexcept

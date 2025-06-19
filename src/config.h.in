@@ -5,5 +5,5 @@
 #define VERSION_MAJOR @orpg_VERSION_MAJOR@
 #define VERSION_MINOR @orpg_VERSION_MINOR@
 
-inline constexpr std::string_view ORPG_BINARY_NAME = "@BINARY_NAME@";
+inline constexpr std::string_view ORPG_BINARY_NAME = "@ORPG_BINARY_NAME@";
 inline constexpr std::string_view ORPG_BINARY_DIRECTORY = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@";
