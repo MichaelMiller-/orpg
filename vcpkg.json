@@ -2,7 +2,8 @@
   "dependencies": [
     "raylib",
     "glfw3",
-    "entt"
+    "entt",
+    "catch2"
   ],
   "features": {
     "tests": {
